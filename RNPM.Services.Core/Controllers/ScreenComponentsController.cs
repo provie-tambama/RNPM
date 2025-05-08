@@ -79,6 +79,44 @@ public class ScreenComponentsController : Controller
         return Ok(new ApiOkResponse(metric, "Metric successfully created"));
     }
     
+    [HttpPost(Name = nameof(SubmitComponentCode))]
+    public async Task<IActionResult> SubmitComponentCode([FromBody] SubmitComponentCodeViewModel model)
+    {
+        var application = await _context.Applications.FirstOrDefaultAsync(d =>
+            d.IsActive && !d.IsDeleted && d.UniqueAccessCode == model.UniqueAccessCode).ConfigureAwait(false);
+    
+        if (application == null)
+        {
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, $"No Application with unique access code!"));
+        }
+    
+        var screenComponent = await _context.ScreenComponents.FirstOrDefaultAsync(d =>
+            d.IsActive && !d.IsDeleted && d.Name == model.Name && d.ApplicationId == application.Id).ConfigureAwait(false);
+    
+        if (screenComponent == null)
+        {
+            var newComponent = new ScreenComponent()
+            {
+                ApplicationId = application.Id,
+                Name = model.Name,
+                SourceCode = model.SourceCode,
+                Threshold = 100
+            };
+        
+            await _context.AddAsync(newComponent).ConfigureAwait(false);
+        }
+        else
+        {
+            // Update existing component
+            screenComponent.SourceCode = model.SourceCode;
+            _context.Update(screenComponent);
+        }
+    
+        await _context.SaveChangesAsync().ConfigureAwait(false);
+    
+        return Ok(new ApiOkResponse(null, "Component code submitted successfully"));
+    }
+    
     [HttpGet("{applicationId}",Name = nameof(GetComponents))]
     public async Task<IActionResult> GetComponents(string applicationId)
     {

@@ -76,6 +76,28 @@ export const createComponentRenderMetric = async (uniqueAccessCode: string, name
     }
   };
 
+  export const submitComponentCode = async (uniqueAccessCode: string, name: string, sourceCode: string) => {
+    const url = `${apiUrl}/screenComponents/submitComponentCode`;
+    const body = JSON.stringify({
+      uniqueAccessCode,
+      name,
+      sourceCode,
+    });
+  
+    try {
+      return await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      }).then(handleResponse);
+    } catch (error) {
+      console.log('Error sending component code:', error);
+      // We could add offline storage for code too, but that might be excessive
+    }
+  };
+
 
   function handleResponse(response: Response) {
     if (!response.ok) {
