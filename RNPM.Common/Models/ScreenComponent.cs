@@ -10,7 +10,7 @@ public class ScreenComponent : BaseEntity
     public string SourceCode { get; set; }
     public string OptimizationSuggestion { get; set; }
     public virtual Application Application { get; set; }
-    
+    public decimal Threshold { get; set; }
     public virtual ICollection<ScreenComponentRender> ScreenComponentRenders { get; set; }
     public virtual ICollection<OptimizationSuggestion> OptimizationSuggestions { get; set; }
 }

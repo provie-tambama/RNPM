@@ -32,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RNPM.CodeOptimizer\RNPM.CodeOptimizer.csproj" />
       <ProjectReference Include="..\RNPM.Common\RNPM.Common.csproj" />
     </ItemGroup>
 

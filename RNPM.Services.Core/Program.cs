@@ -15,6 +15,7 @@ using RNPM.Common.Base.Infrastructure.Filters;
 using RNPM.Common.Data;
 using RNPM.Common.Interfaces;
 using RNPM.Common.Models;
+using RNPM.CodeOptimizer.Services;
 using Swashbuckle.AspNetCore.Filters;
 
 Log.Logger = new LoggerConfiguration()
@@ -42,6 +43,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
     builder.Services.AddTransient<IDateTimeService, DateTimeService>();
+    builder.Services.AddTransient<ICodeOptimizerService,CodeOptimizerService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -71,6 +73,8 @@ try
             }
         });
     });
+    
+    builder.Services.Configure<OptimizerParameters>(options => builder.Configuration.GetSection(OptimizerParameters.Parameters).Bind(options));
     
     // For Identity
     builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
