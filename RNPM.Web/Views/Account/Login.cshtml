@@ -1,0 +1,101 @@
+@model RNPM.Common.ViewModels.LoginViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8" />
+<title>RNPM | Login</title>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+<meta content name="description" />
+<meta content name="author" />
+
+<link href="~/assets/css/vendor.min.css" rel="stylesheet" />
+<link href="~/assets/css/default/app.min.css" rel="stylesheet" />
+
+</head>
+<body class="pace-top">
+
+<div id="loader" class="app-loader">
+<span class="spinner"></span>
+</div>
+
+
+<div id="app" class="app">
+
+<div class="login login-v1">
+
+<div class="login-container">
+
+<div class="login-header">
+<div class="brand">
+<div class="d-flex align-items-center">
+<span class="logo"></span> <b class="me-1">RN</b> Performance
+</div>
+<small>Monitor your Application's performance</small>
+</div>
+<div class="icon">
+<i class="fa fa-lock"></i>
+</div>
+</div>
+
+
+<div class="login-body">
+
+<div class="login-content fs-13px">
+	<form asp-action="Login" asp-controller="Account" method="post">
+		<partial name="_SuccessMessage" />
+		<partial name="_ValidationSummary" />
+		<div class="form-floating mb-20px">
+			<input type="email" class="form-control fs-13px h-45px" id="emailAddress" placeholder="Email Address" asp-for="Username" autofocus required/>
+			<label for="emailAddress" class="d-flex align-items-center">Email Address</label>
+		</div>
+		<div class="form-floating mb-20px">
+			<input type="password" class="form-control fs-13px h-45px" id="password" placeholder="Password" asp-for="Password" autocomplete="off" required/>
+			<label for="password" class="d-flex align-items-center">Password</label>
+		</div>
+		<div class="form-check mb-20px">
+			<input class="form-check-input" type="checkbox" value id="rememberMe"/>
+			<label class="form-check-label" for="rememberMe">
+				Remember Me
+			</label>
+		</div>
+		<div class="login-buttons">
+			<button type="submit" value="login" class="btn btn-theme h-45px d-block w-100 btn-lg">Sign me in</button>
+		</div>
+		<div class="text-gray-500 mt-20px">
+        Not a member yet? Click <a href="/account/register" class="text-white">here</a> to register.
+        </div>
+	</form>
+</div>
+
+</div>
+
+</div>
+
+</div>
+	
+<a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+
+</div>
+
+
+<script src="~/assets/js/vendor.min.js" type="9e0bfa4d20fee90993d70e89-text/javascript"></script>
+<script src="~/assets/js/app.min.js" type="9e0bfa4d20fee90993d70e89-text/javascript"></script>
+<script src="~/assets/js/fontawesome.js" crossorigin="anonymous"></script>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y3Q0VGQKY3" type="9e0bfa4d20fee90993d70e89-text/javascript"></script>
+<script type="9e0bfa4d20fee90993d70e89-text/javascript">
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+	
+		gtag('config', 'G-Y3Q0VGQKY3');
+	</script>
+<script src="~/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="9e0bfa4d20fee90993d70e89-|49" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/vef91dfe02fce4ee0ad053f6de4f175db1715022073587" integrity="sha512-sDIX0kl85v1Cl5tu4WGLZCpH/dV9OHbA4YlKCuCiMmOQIk4buzoYDZSFj+TvC71mOBLh8CDC/REgE0GX0xcbjA==" data-cf-beacon='{"rayId":"88add6c0ea3395fb","version":"2024.4.1","r":1,"token":"4db8c6ef997743fda032d4f73cfeff63","b":1}' crossorigin="anonymous"></script>
+</body>
+
+</html>

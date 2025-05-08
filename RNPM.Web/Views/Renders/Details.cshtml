@@ -1,0 +1,200 @@
+@using RNPM.Common.ViewModels.Core
+@using Newtonsoft.Json
+@using RNPM.Common.Data.Enums
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "_Layout";
+    var component = (ComponentViewModel)ViewBag.ScreenComponent;
+  string averageString = component.Statistics?.Average?.ToString("###.000") ?? "0.000";
+  var renderAverages = (List<DailyAverageViewModel>)ViewBag.RenderAverages;
+}
+
+<div id="content" class="app-content">
+  <ol class="breadcrumb float-xl-end"></ol>
+    
+  <h1 class="page-header">SCREEN: @component.Name</h1>
+    
+  <div class="col-12">
+    
+    <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
+      <div class="panel-heading">
+        <h4 class="panel-title">Averages</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p class="h4">Average Component Render Time: <b>@averageString ms</b>
+                    @switch (component.Statistics?.Status)
+                    {
+                      case MetricStatus.Excellent:
+                        <span class="badge bg-success">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      case MetricStatus.Good:
+                        <span class="badge bg-primary">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      case MetricStatus.Acceptable:
+                        <span class="badge bg-info">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      case MetricStatus.NeedsImprovement:
+                        <span class="badge bg-warning">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      case MetricStatus.Poor:
+                        <span class="badge bg-danger">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      case MetricStatus.VeryPoor:
+                        <span class="badge bg-dark">@component.Statistics?.Status.ToString()</span>
+                        break;
+                      default:
+                        <span class="badge bg-secondary">Unknown</span>
+                        break;
+                    }
+          </p>
+                <h6>@component.Statistics?.Insight</h6>
+                <p>
+                  @component.Statistics?.Comment
+                </p>
+        <p class="h5">Daily Averages:</p>
+        <div id="renders-chart" class="h-250px"></div>
+      </div>
+      <div class="hljs-wrapper">
+      </div>
+    </div>
+    <div class="panel panel-inverse" data-sortable-id="table-basic-5">
+              
+              <div class="panel-heading">
+              <h4 class="panel-title">Most recent metrics</h4>
+              <div class="panel-heading-btn">
+              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+              </div>
+              </div>
+              
+              
+              <div class="panel-body">
+              
+              <div class="table-responsive">
+              <table class="table table-striped mb-0">
+              <thead>
+              <tr>
+              <th>Metric</th>
+              <th>Date Recorded</th>
+              </tr>
+              </thead>
+              <tbody>
+              @if (component.ScreenComponentRenders != null)
+              {
+                foreach (var render in component.ScreenComponentRenders)
+                {
+                  <tr>
+                    <td>@render.RenderTime.ToString("###.000")ms</td>
+                    <td>@render.Date</td>
+                  </tr>
+                }
+              }
+              </tbody>
+              </table>
+              </div>
+              
+              </div>
+              
+              
+              <div class="hljs-wrapper">
+              <pre><code class="html" data-url="../assets/data/table-basic/code-5.json"></code></pre>
+              </div>
+              
+      </div>
+    
+  </div>
+</div>
+
+@section Scripts{
+  <script type="4eaa729db74b6f489294f4e0-text/javascript">
+  $(document).ready(function () {
+  handleRendersChart()
+  });
+  </script>
+  <script>
+var handleRendersChart = function () {
+  "use strict";
+  $("#renders-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#renders-chart").length !== 0) {
+    var renderAverages = @Html.Raw(JsonConvert.SerializeObject(renderAverages));
+    if (renderAverages && renderAverages.length > 0) {
+    var data = renderAverages.map((item, index) => [index + 1, item.Average]);
+    var xLabel = renderAverages.map((item, index) => [index + 1, item.Date]);
+    }
+
+    else {
+      alert("No Render Values Available");
+      location.href("#");
+      }
+
+    $.plot(
+      $("#renders-chart"),
+      [
+        {
+          data: data,
+          label: "Render Time",
+          color: app.color.blue,
+          lines: { show: true, fill: false, lineWidth: 2 },
+          points: { show: true, radius: 3, fillColor: app.color.componentBg },
+          shadowSize: 0,
+        }
+      ],
+      {
+        xaxis: {
+          ticks: xLabel,
+          tickDecimals: 0,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+        },
+        yaxis: {
+          ticks: 10,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          min: 0,
+          max: 200,
+        },
+        grid: {
+          hoverable: true,
+          clickable: true,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          borderWidth: 1,
+          backgroundColor: "transparent",
+          borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+        },
+        legend: {
+          labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          margin: 10,
+          noColumns: 1,
+          show: true,
+        },
+      }
+    );
+    var previousPoint = null;
+    $("#renders-chart").bind("plothover", function (event, pos, item) {
+      $("#x").text(pos.x.toFixed(2));
+      $("#y").text(pos.y.toFixed(2));
+      if (item) {
+        if (previousPoint !== item.dataIndex) {
+          previousPoint = item.dataIndex;
+          $("#tooltip").remove();
+          var y = item.datapoint[1].toFixed(2);
+          var content = item.series.label + " " + y;
+          showTooltip(item.pageX, item.pageY, content);
+        }
+      } else {
+        $("#tooltip").remove();
+        previousPoint = null;
+      }
+      event.preventDefault();
+    });
+  }
+  };
+</script>
+}

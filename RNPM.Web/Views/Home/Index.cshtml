@@ -1,8 +1,77 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using RNPM.Common.ViewModels.Core
+@model RNPM.Common.ViewModels.Core.CreateApplicationViewModel
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_ApplicationsLayout";
+}
+@{
+    var applications = (IEnumerable<ApplicationViewModel>)ViewBag.Applications;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="content" class="app-content align-items-center " xmlns="http://www.w3.org/1999/html">
+    
+<!-- begin widget-list -->
+<div class="row align-items-center justify-content-center">
+    <div class="col-xl-6 col-lg-6 align-self-center">
+    
+    <div class="mb-10px mt-10px fs-10px">
+    <b class="text-body h1">Applications</b>
+    </div>
+        <div class="widget-list rounded mb-4" data-id="widget">
+            
+                @foreach (var item in applications)
+                {
+                    <div class="row">
+                        <a href="/Home/Dashboard/@item.Id" class="widget-list-item align-items-center col-11">
+                            <div class="widget-list-media icon">
+                                <i class="fa-brands fa-adn bg-dark text-white"></i>
+                            </div>
+                            <div class="widget-list-content">
+                                <h4 class="widget-list-title">@item.Name</h4>
+                            </div>
+                        </a>
+                        <a href="@Url.Action("DeleteApplication", "Home", new { id = item.Id })" class=" widget-list-item align-items-center col-1">
+                            <i class="fa fa-trash fa-lg text-body text-red text-opacity-30"></i>
+                        </a>
+                    </div>
+                }
+            <a href="#modal-dialog" data-bs-toggle="modal" class="widget-list-item bg-transparent">
+                <div class="widget-list-media icon">
+                    <i class="fa-solid fa-plus text-white bg-dark"></i>
+                </div>
+                <div class="widget-list-content">
+                    <h4 class="widget-list-title">Add new +</h4>
+                </div>
+            </a>
+        </div>
+        
+        <!-- #modal-dialog -->
+        <div class="modal fade" id="modal-dialog">
+            <div class="modal-dialog">
+                <form asp-action="CreateApplication" asp-controller="Home" method="post">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Add Application</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-floating mb-20px">
+                                <input type="text" class="form-control fs-13px h-45px" id="applicationName" placeholder="Application Name" asp-for="Name" autofocus required/>
+                                <label for="applicationName" class="d-flex align-items-center">Application Name</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                            <input class="btn btn-success" type="submit" value="Confirm"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    
+    </div>
+    <!-- end widget-list -->
+    </div>
+
 </div>
+

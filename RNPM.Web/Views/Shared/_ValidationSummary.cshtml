@@ -1,0 +1,10 @@
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+{
+    @foreach (var error in ViewData.ModelState[string.Empty]?.Errors)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @error.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+}

@@ -1,0 +1,148 @@
+@using RNPM.Common.ViewModels.Core
+@{
+    ViewData["Title"] = "Dashboard";
+}
+@{
+    var application = (ApplicationViewModel)ViewBag.Application;
+    var components = (IEnumerable<ScreenComponentViewModel>)ViewBag.ScreenComponents;
+    var navigations = (IEnumerable<NavigationViewModel>)ViewBag.Navigations;
+    var networkRequests = (IEnumerable<NetworkRequestViewModel>)ViewBag.NetworkRequests;
+}
+
+<div id="content" class="app-content">
+
+    <ol class="breadcrumb float-xl-end">
+    </ol>
+
+    <h1 class="page-header">@application.Name <small>Unique Access Code --- @application.UniqueAccessCode</small></h1>
+
+    <div class="row">
+
+        <div class="col-xl-4 col-md-6">
+            <div class="widget widget-stats bg-blue">
+                <div class="stats-icon"><i class="fa fa-mobile"></i></div>
+                <div class="stats-info">
+                    <h4>Managed Components</h4>
+                    <p>@components.Count()</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="widget widget-stats bg-info">
+                <div class="stats-icon"><i class="fa fa-code-compare"></i></div>
+                <div class="stats-info">
+                    <h4>Managed Navigations</h4>
+                    <p>@navigations.Count()</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="widget widget-stats bg-orange">
+                <div class="stats-icon"><i class="fa fa-link"></i></div>
+                <div class="stats-info">
+                    <h4>Managed Requests</h4>
+                    <p>@networkRequests.Count()</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-12 flex-1">
+            <ul class="nav nav-tabs nav-tabs-inverse nav-justified" data-sortable-id="index-2">
+                <li class="nav-item">
+                    <a href="#component-renders" data-bs-toggle="tab" class="nav-link active"><i class="fa fa-mobile fa-lg me-5px"></i><span class="d-none d-md-inline">Managed Component Renders</span></a>
+                </li>
+                <li class="nav-item"><a href="#navigations" data-bs-toggle="tab" class="nav-link"><i class="fa fa-code-compare fa-lg me-5px"></i> <span class="d-none d-md-inline">Managed Navigations</span></a></li>
+                <li class="nav-item"><a href="#requests" data-bs-toggle="tab" class="nav-link"><i class="fa fa-link fa-lg me-5px"></i> <span class="d-none d-md-inline">Managed Network Requests</span></a></li>
+            </ul>
+            <div class="tab-content panel rounded-0 rounded-bottom mb-20px " data-sortable-id="index-3">
+                <div class="tab-pane fade active show" id="component-renders">
+                    <div class=" h-500px widget-list " data-scrollbar="true" data-id="widget">
+                        @if (components?.Count() > 0)
+                        {
+                            @foreach (var item in components)
+                            {
+                                <div class="widget-list-item border-bottom row">
+                                    <div class="widget-list-content col-xl-10 col-lg-8">
+                                        <a href="@Url.Action("Details", "Renders", new { id = item.Id })">
+                                            <h4 class="widget-list-title">@item.Name</h4>
+                                        </a>
+                                    </div>
+                                    <div class="widget-list-action text-end col-xl-2 col-lg-4">
+                                        <a href="@Url.Action("DeleteComponent", "Renders", new { id = item.Id })">
+                                            <i class="fa fa-trash fa-lg text-red text-body text-opacity-30"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>No managed components</p>
+                        }
+
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="navigations">
+                    <div class=" h-500px widget-list " data-scrollbar="true" data-id="widget">
+                        @if (navigations?.Count() > 0)
+                        {
+                            foreach (var item in navigations)
+                            {
+                                <div class="widget-list-item border-bottom row">
+                                    <div class="widget-list-content col-xl-10 col-lg-8">
+                                        <a href="@Url.Action("Index", "Navigations", new { id = item.Id })">
+                                            <h4 class="widget-list-title">@item.FromScreen ----> @item.ToScreen</h4>
+                                        </a>
+                                    </div>
+                                    <div class="widget-list-action text-end col-xl-2 col-lg-4">
+                                        <a href="@Url.Action("DeleteNavigation", "Navigations", new { id = item.Id })">
+                                            <i class="fa fa-trash fa-lg text-red text-body text-opacity-30"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>No managed Navigations</p>
+                        }
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="requests">
+                    <div class=" h-500px widget-list " data-scrollbar="true" data-id="widget">
+                        @if (navigations?.Count() > 0){
+                        foreach (var item in networkRequests)
+                        {
+                            <div class="widget-list-item border-bottom row">
+                                <div class="widget-list-content col-xl-10 col-lg-8">
+                                    <a href="@Url.Action("Index", "Requests", new { id = item.Id })">
+                                        <h4 class="widget-list-title">@item.Name</h4>
+                                    </a>
+                                </div>
+                                <div class="widget-list-action text-end col-xl-2 col-lg-4">
+                                    <a href="@Url.Action("DeleteRequest", "Requests", new { id = item.Id })">
+                                        <i class="fa fa-trash fa-lg text-red text-body text-opacity-30"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        }
+                        else
+                        {
+                            <p>No managed Network Requests</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+

@@ -1,0 +1,110 @@
+@using Dohwe.Web.Extensions
+@using RNPM.Common.Constants
+@using RNPM.Common.ViewModels
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var user = HttpContextAccessor.HttpContext?.Session.GetObject<UserViewModel>(SessionConstants.User);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RNPM.Web</title>
+
+    <link href="~/assets/css/vendor.min.css" rel="stylesheet" />
+    <link href="~/assets/css/default/app.min.css" rel="stylesheet" />
+
+
+    <link href="~/assets/plugins/jvectormap-next/jquery-jvectormap.css" rel="stylesheet" />
+    <link href="~/assets/plugins/bootstrap-datepicker/dist/css/bootstrap-datepicker.css" rel="stylesheet" />
+    <link href="~/assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="loader" class="app-loader">
+        <span class="spinner"></span>
+    </div>
+
+    <div id="app" class="app app-header-fixed app-without-sidebar ">
+        <div id="header" class="app-header">
+
+            <div class="navbar-header">
+                <a href="#" class="navbar-brand"><span class="navbar-logo"></span> <b class="me-3px">RN</b> Perfomance</a>
+                <button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+
+
+            <div class="navbar-nav">
+                <div class="navbar-item navbar-user dropdown">
+                    <a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                        <i class="fa fa-user"></i>
+                        <span>
+                            <span class="d-none d-md-inline">@user?.Fullname</span>
+                            <b class="caret"></b>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end me-1">
+                        <div class="dropdown-divider"></div>
+                        <a asp-controller="Account" asp-action="Logout" class="dropdown-item">Log Out</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+
+        <a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+    </div>
+
+    <script src="~/assets/js/vendor.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/js/app.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+
+
+    <script src="~/assets/plugins/gritter/js/jquery.gritter.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.canvaswrapper.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.colorhelpers.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.saturated.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.browser.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.drawSeries.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.uiConstants.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.time.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.resize.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.pie.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.crosshair.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.categories.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.navigate.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.touchNavigate.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.hover.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.touch.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.selection.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.symbol.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/flot/source/jquery.flot.legend.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/jquery-sparkline/jquery.sparkline.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/jvectormap-next/jquery-jvectormap.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/jvectormap-content/world-mill.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script src="~/assets/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+<script src="~/assets/js/demo/dashboard.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+<script src="~/assets/js/fontawesome.js" crossorigin="anonymous"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y3Q0VGQKY3" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <script type="4eaa729db74b6f489294f4e0-text/javascript">
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-Y3Q0VGQKY3');
+    </script>
+    <script src="~/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="4eaa729db74b6f489294f4e0-|49" defer></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vef91dfe02fce4ee0ad053f6de4f175db1715022073587" integrity="sha512-sDIX0kl85v1Cl5tu4WGLZCpH/dV9OHbA4YlKCuCiMmOQIk4buzoYDZSFj+TvC71mOBLh8CDC/REgE0GX0xcbjA==" data-cf-beacon='{"rayId":"88add6a40d4995fb","version":"2024.4.1","r":1,"token":"4db8c6ef997743fda032d4f73cfeff63","b":1}' crossorigin="anonymous"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

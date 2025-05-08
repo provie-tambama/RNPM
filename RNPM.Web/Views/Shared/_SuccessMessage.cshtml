@@ -1,0 +1,8 @@
+@if (!string.IsNullOrEmpty(ViewBag.Message))
+{
+    <div class="alert alert-success alert-dismissible fade show">
+    <strong>Success!</strong>
+    @ViewBag.Message
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
