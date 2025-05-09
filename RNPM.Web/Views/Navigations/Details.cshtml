@@ -1,0 +1,199 @@
+@using RNPM.Common.ViewModels.Core
+@using Newtonsoft.Json
+@using RNPM.Common.Data.Enums
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "_Layout";
+    var navigation = (NavigationViewModel)ViewBag.Navigation;
+  string averageString = navigation.Statistics?.Average?.ToString("###.000") ?? "0.000";
+  var navigationAverages = (List<DailyAverageViewModel>)ViewBag.NavigationAverages;
+}
+
+<div id="content" class="app-content">
+  <ol class="breadcrumb float-xl-end"></ol>
+    
+  <h1 class="page-header">NAVIGATION PATH: @navigation.FromScreen ---> @navigation.ToScreen</h1>
+    
+  <div class="col-12">
+    
+    <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
+      <div class="panel-heading">
+        <h4 class="panel-title">Averages</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p class="h4">Average Navigation Time: <b>@averageString ms</b>
+          @switch (navigation.Statistics?.Status)
+          {
+            case MetricStatus.Good:
+              <span class="badge bg-primary">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            case MetricStatus.Excellent:
+              <span class="badge bg-success">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            case MetricStatus.Acceptable:
+              <span class="badge bg-info">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            case MetricStatus.NeedsImprovement:
+              <span class="badge bg-warning">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            case MetricStatus.Poor:
+              <span class="badge bg-danger">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            case MetricStatus.VeryPoor:
+              <span class="badge bg-dark">@navigation.Statistics?.Status.ToString()</span>
+              break;
+            default:
+              <span class="badge bg-secondary">Unknown</span>
+              break;
+          }
+        </p>
+        <h6>@navigation.Statistics?.Insight</h6>
+        <p>
+          @navigation.Statistics?.Comment
+        </p>
+        <p class="h5">Most Recent Navigation Times:</p>
+        <div id="navigations-chart" class="h-250px"></div>
+      </div>
+      <div class="hljs-wrapper">
+      </div>
+    </div>
+    <div class="panel panel-inverse" data-sortable-id="table-basic-5">
+                  
+                  <div class="panel-heading">
+                  <h4 class="panel-title">Most recent metrics</h4>
+                  <div class="panel-heading-btn">
+                  <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+                  </div>
+                  </div>
+                  
+                  <div class="panel-body">
+                  
+                  <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                  <thead>
+                  <tr>
+                  <th>Metric</th>
+                  <th>Date Recorded</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  @if (navigation.NavigationInstances != null)
+                  {
+                    foreach (var item in navigation.NavigationInstances)
+                    {
+                      <tr>
+                        <td>@item.NavigationCompletionTime.ToString("###.000")ms</td>
+                        <td>@item.Date</td>
+                      </tr>
+                    }
+                  }
+                  </tbody>
+                  </table>
+                  </div>
+                  
+                  </div>
+                  
+                  
+                  <div class="hljs-wrapper">
+                  <pre><code class="html" data-url="../assets/data/table-basic/code-5.json"></code></pre>
+                  </div>
+                  
+          </div>
+    
+  </div>
+</div>
+
+@section Scripts{
+  <script type="4eaa729db74b6f489294f4e0-text/javascript">
+  $(document).ready(function () {
+  handleNavigationsChart()
+  });
+  </script>
+  <script>
+var handleNavigationsChart = function () {
+  "use strict";
+  $("#navigations-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#navigations-chart").length !== 0) {
+    var navigationAverages = @Html.Raw(JsonConvert.SerializeObject(navigationAverages));
+    if (navigationAverages.length > 0) {
+    var data = navigationAverages.map((item, index) => [index + 1, item.Average]);
+    var xLabel = navigationAverages.map((item, index) => [index + 1, item.Date]);
+    }
+
+    else {
+      alert("No Render Values Available");
+      location.href("#");
+      }
+
+    $.plot(
+      $("#navigations-chart"),
+      [
+        {
+          data: data,
+          label: "Navigation Time",
+          color: app.color.blue,
+          lines: { show: true, fill: false, lineWidth: 2 },
+          points: { show: true, radius: 3, fillColor: app.color.componentBg },
+          shadowSize: 0,
+        }
+      ],
+      {
+        xaxis: {
+          ticks: xLabel,
+          tickDecimals: 0,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+        },
+        yaxis: {
+          ticks: 10,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          min: 0,
+          max: 200,
+        },
+        grid: {
+          hoverable: true,
+          clickable: true,
+          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          borderWidth: 1,
+          backgroundColor: "transparent",
+          borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+        },
+        legend: {
+          labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          margin: 10,
+          noColumns: 1,
+          show: true,
+        },
+      }
+    );
+    var previousPoint = null;
+    $("#navigations-chart").bind("plothover", function (event, pos, item) {
+      $("#x").text(pos.x.toFixed(2));
+      $("#y").text(pos.y.toFixed(2));
+      if (item) {
+        if (previousPoint !== item.dataIndex) {
+          previousPoint = item.dataIndex;
+          $("#tooltip").remove();
+          var y = item.datapoint[1].toFixed(2);
+          var content = item.series.label + " " + y;
+          showTooltip(item.pageX, item.pageY, content);
+        }
+      } else {
+        $("#tooltip").remove();
+        previousPoint = null;
+      }
+      event.preventDefault();
+    });
+  }
+  };
+</script>
+}

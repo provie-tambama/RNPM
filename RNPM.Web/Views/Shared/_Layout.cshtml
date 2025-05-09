@@ -2,6 +2,7 @@
 @using RNPM.Common.Constants
 @using RNPM.Common.ViewModels
 @using RNPM.Common.ViewModels.Core
+@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var user = HttpContextAccessor.HttpContext?.Session.GetObject<UserViewModel>(SessionConstants.User);
@@ -87,7 +88,6 @@
                                 <i class="fa fa-sitemap"></i>
                             </div>
                             <div class="menu-text">@item.Name</div>
-                            <a href="http://dohwe.com"><i class="fa fa-sm fa-info"></i></a>
                         </a>
                     </div>
                 }

@@ -17,6 +17,23 @@ public class RendersController : BaseController<RendersController>
     }
     
     [HttpGet]
+    public async Task<IActionResult> Index(string applicationId)
+    {
+        if (applicationId != null)
+        {
+            var applications = await Get<List<ApplicationViewModel>>(await GetHttpClient(), "api/applications/getuserapplications",
+                GetUserId());
+            var components = await Get<List<ComponentViewModel>>(await GetHttpClient(), "api/screenComponents/getComponents", applicationId);
+            ViewBag.Applications = applications;
+            ViewBag.ScreenComponents = components;
+            
+            return View();
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+    
+    [HttpGet]
     public async Task<IActionResult> Details(string id)
     {
         if (id != null)
