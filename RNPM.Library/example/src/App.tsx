@@ -8,16 +8,18 @@ import type { RootStackParamList } from './types';
 import DetailsScreen from './Screens/DetailsScreen';
 import { getSavedMetrics } from '../../src/utils/offlineStorage';
 import { initRetryMechanism } from '../../src/utils/retryMetrics';
+import { registerComponentSource } from '../../src/utils/sourceRegistry';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const App = () => {
+const App = () => { 'noHermes';'show source'
 useEffect(() => {
   getSavedMetrics().then((data) => {
-    console.log('Saved metrics:', data);
+    //TODO: console.log('Saved metrics:', data);
     
   });
   initRetryMechanism();
+  
 }, [])
   return (
     <NavigationContainer>
@@ -31,6 +33,9 @@ useEffect(() => {
     </NavigationContainer>
   );
 };
+
+const gg = App.toString();
+console.log('App component source code:', gg);
 
 export default App;
 

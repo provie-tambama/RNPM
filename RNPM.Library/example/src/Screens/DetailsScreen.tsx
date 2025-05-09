@@ -23,7 +23,7 @@ const DetailsScreen = () => {
       }
     }
     useEffect(() => {
-        console.log('Data:', data);
+        //console.log('Data:', data);
     }, [data])
   return (
     <View style={styles.container}>

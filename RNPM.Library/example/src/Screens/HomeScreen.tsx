@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { type HomeScreenNavigationProp } from '../types';
 import { setNavigationStartTime, withRenderTimeMonitor } from 'react-native-performance-monitor';
+import { registerComponentSource } from 'react-native-performance-monitor';
 
-const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }) => {
+const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }) => { 'show source'
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const handleGoToDetails = () => {
@@ -18,13 +19,16 @@ const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={{backgroundColor:"#fff"}}>
+          <View style={styles.container}>
       <Text style={styles.mainText}>Screen to test the render metrics measurement</Text>
       <Text style={{textAlign:"center", marginTop:50, marginHorizontal:10}}>To test <Text style={{fontWeight:"800"}}>Navigations</Text>, you can navigate to the Details Screen and the Profile Screen</Text>
       <Text style={{textAlign:"center", marginTop:15, marginHorizontal:10, marginBottom:30}}>To test <Text style={{fontWeight:"800"}}>Network Request Completion Time</Text>, you can navigate to the Details Screen</Text>
       <Button  title="Go to Details" onPress={handleGoToDetails} />
       <Button title="Go to Profile" onPress={handleGoToProfile} />
     </View>
+    </ScrollView>
+
   );
 };
 

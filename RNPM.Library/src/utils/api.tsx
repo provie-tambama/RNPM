@@ -73,6 +73,10 @@ export const createComponentRenderMetric = async (uniqueAccessCode: string, name
     } catch (error) {
       console.log('Error sending network request metric:', error);
       await saveMetric({ uniqueAccessCode, name, requestCompletionTime });
+      return new Response(null, { 
+        status: 0,
+        statusText: 'Network error occurred, saved for later retry' 
+      });
     }
   };
 

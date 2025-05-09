@@ -1,6 +1,7 @@
 // src/performance/withRenderTimeMonitor.tsx
 import React, { useEffect, useRef } from 'react';
 import { createComponentRenderMetric, submitComponentCode } from '../utils/api';
+import { getComponentSource, getRegisteredComponents } from '../utils/sourceRegistry';
 
 type WithRenderTimeMonitorProps = {
   uniqueAccessCode: string;
@@ -31,17 +32,16 @@ const withRenderTimeMonitor = <P extends object>(
         onRenderTimeMeasured(renderTime);
       }
 
-      console.log('Component mounteds');
       const send = async () => {
-        console.log('Sending render time metric');
+
+        await createComponentRenderMetric(uniqueAccessCode, componentName, renderTime);
+        
         if (captureCode) {
           try {
             // Get component source code
-            console.log('Capturing component code');
-            const sourceCode = WrappedComponent.toString();
+            const sourceCode = getComponentSource(componentName);
             if (sourceCode) {
               await submitComponentCode(uniqueAccessCode, componentName, sourceCode);
-              console.log('Source code', sourceCode);
             }
           } catch (error) {
             console.error('Error capturing component code:', error);
@@ -50,8 +50,6 @@ const withRenderTimeMonitor = <P extends object>(
         else{
           console.log('Component code capture skipped');
         }
-
-        await createComponentRenderMetric(uniqueAccessCode, componentName, renderTime);
 
       }
       send();
