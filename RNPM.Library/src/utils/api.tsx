@@ -55,6 +55,7 @@ export const createComponentRenderMetric = async (uniqueAccessCode: string, name
   export const createNetworkRequestMetric = async (uniqueAccessCode: string, name: string, requestCompletionTime: number) => {
     //console.log("body", uniqueAccessCode, name, requestCompletionTime);
     const url = `${apiUrl}/networkRequests/createNetworkRequestMetric`;
+    console.log("url", url);
     const body = JSON.stringify({
       uniqueAccessCode,
       name,

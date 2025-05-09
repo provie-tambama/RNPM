@@ -17,7 +17,24 @@ public class RequestsController : BaseController<RequestsController>
     }
     
     [HttpGet]
-    public async Task<IActionResult> Index(string id)
+    public async Task<IActionResult> Index(string applicationId)
+    {
+        if (applicationId != null)
+        {
+            var applications = await Get<List<ApplicationViewModel>>(await GetHttpClient(), "api/applications/getuserapplications",
+                GetUserId());
+            var requests = await Get<List<NetworkRequestViewModel>>(await GetHttpClient(), "api/networkRequests/getNetworkRequests", applicationId);
+            ViewBag.Applications = applications;
+            ViewBag.ScreenComponents = requests;
+            
+            return View();
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Details(string id)
     {
         if (id != null)
         {

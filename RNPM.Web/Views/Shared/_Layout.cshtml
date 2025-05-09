@@ -7,6 +7,7 @@
 @{
     var user = HttpContextAccessor.HttpContext?.Session.GetObject<UserViewModel>(SessionConstants.User);
     var applications = (IEnumerable<ApplicationViewModel>)ViewBag.Applications;
+    var currentApplicationId = ViewBag.Application?.Id;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -38,7 +39,6 @@
                     <span class="icon-bar"></span>
                 </button>
             </div>
-
 
             <div class="navbar-nav">
                 <div class="navbar-item navbar-user dropdown">
@@ -82,7 +82,7 @@
                     <div class="menu-header">Applications</div>
                 @foreach (var item in applications)
                 {
-                    <div class="menu-item active">
+                    <div class="menu-item @(item.Id == currentApplicationId ? "active" : "")">
                         <a href="@Url.Action("Dashboard", "Home", new {id = item.Id})" class="menu-link">
                             <div class="menu-icon">
                                 <i class="fa fa-sitemap"></i>
@@ -158,4 +158,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

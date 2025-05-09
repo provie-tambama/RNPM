@@ -25,7 +25,7 @@ useEffect(() => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
       <Stack.Screen name="Home">
-          {props => <HomeScreen {...props} uniqueAccessCode="925BEBE09CAD13641792961A5DEC7962" />}
+          {props => <HomeScreen {...props} uniqueAccessCode="D0CB0E3ABAFC643DCE1B0C45CA572B4A" />}
         </Stack.Screen>
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Details" component={DetailsScreen} />

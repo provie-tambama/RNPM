@@ -17,7 +17,24 @@ public class NavigationsController : BaseController<NavigationsController>
     }
     
     [HttpGet]
-    public async Task<IActionResult> Index(string id)
+    public async Task<IActionResult> Index(string applicationId)
+    {
+        if (applicationId != null)
+        {
+            var applications = await Get<List<ApplicationViewModel>>(await GetHttpClient(), "api/applications/getuserapplications",
+                GetUserId());
+            var navigations = await Get<List<NavigationViewModel>>(await GetHttpClient(), "api/navigations/getNavigations", applicationId);
+            ViewBag.Applications = applications;
+            ViewBag.Navigations = navigations;
+            
+            return View();
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Details(string id)
     {
         if (id != null)
         {
