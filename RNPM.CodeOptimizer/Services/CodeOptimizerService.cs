@@ -12,21 +12,30 @@ namespace RNPM.CodeOptimizer.Services;
 public class CodeOptimizerService : ICodeOptimizerService
 {
     private readonly RnpmDbContext _context;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly OptimizerParameters _optimizerParameters;
     private const string BaseApiUrl = "https://theFinalUrl/";
     
-    public CodeOptimizerService(HttpClient httpClient, RnpmDbContext context, IOptions<OptimizerParameters> cbzParameters)
+    public CodeOptimizerService(IHttpClientFactory httpClientFactory, RnpmDbContext context, IOptions<OptimizerParameters> cbzParameters)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _context = context;
         _optimizerParameters = cbzParameters.Value;
+    }
+    
+    private HttpClient GetHttpClient()
+    {
+        var client = _httpClientFactory.CreateClient();
+        // Configure as needed
+        return client;
     }
     
     public async Task<CodeOptimizationResponse> OptimizeCodeAsync(CodeOptimizationRequest request)
     {
         try
         {
+            var httpClient = GetHttpClient();
+
             var huggingFaceRequest = new HuggingfaceRequest
             {
                 Inputs = FormatHelpers.FormatPrompt(request.Code),
@@ -42,7 +51,7 @@ public class CodeOptimizerService : ICodeOptimizerService
             var requestUri = $"{BaseApiUrl}api/transactions";
             
             var httpRequest = HttpHelpers.GetPostRequestMessage(huggingFaceRequest, requestUri);
-            var response = await _httpClient.SendAsync(httpRequest);
+            var response = await httpClient.SendAsync(httpRequest);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -95,7 +104,8 @@ public class CodeOptimizerService : ICodeOptimizerService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_optimizerParameters.HuggingFaceApiUrl}/models/{_optimizerParameters.ModelName}");
+            var httpClient = GetHttpClient();
+            var response = await httpClient.GetAsync($"{_optimizerParameters.HuggingFaceApiUrl}/models/{_optimizerParameters.ModelName}");
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)

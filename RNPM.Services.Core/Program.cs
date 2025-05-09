@@ -41,6 +41,7 @@ try
     builder.Services.AddAutoMapper(typeof(MappingProfile));
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddHttpClient();
     builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
     builder.Services.AddTransient<IDateTimeService, DateTimeService>();
     builder.Services.AddTransient<ICodeOptimizerService,CodeOptimizerService>();

@@ -34,9 +34,6 @@ useEffect(() => {
   );
 };
 
-const gg = App.toString();
-console.log('App component source code:', gg);
-
 export default App;
 
 const styles = StyleSheet.create({

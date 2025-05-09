@@ -579,6 +579,9 @@ namespace RNPM.Common.Migrations
                     b.Property<string>("SourceCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Threshold")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationId");
