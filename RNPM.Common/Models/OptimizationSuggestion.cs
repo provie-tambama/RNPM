@@ -8,6 +8,8 @@ public class OptimizationSuggestion : BaseEntity
     public string Suggestion { get; set; }
     public bool Success { get; set; }
     public string Message { get; set; }
+    public bool IsImplemented { get; set; }
+    public DateTime ImplementedDate { get; set; }
     
     public virtual ScreenComponent Component { get; set; }
 }

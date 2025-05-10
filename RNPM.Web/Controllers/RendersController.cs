@@ -1,6 +1,8 @@
+using System.Net;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RNPM.Common.Models;
 using RNPM.Common.ViewModels.Core;
 
 namespace RNPM.Web.Controllers;
@@ -67,6 +69,31 @@ public class RendersController : BaseController<RendersController>
             
             //return Json(value);
             return RedirectToAction("Dashboard","Home", new {id = componentToDelete.ApplicationId});
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> MarkImplemented(MarkOptimizationImplementedViewModel model)
+        {
+            var result = await Add<OptimizationSuggestion, MarkOptimizationImplementedViewModel>(
+                await GetHttpClient(), 
+                "api/screenComponents/markOptimizationImplemented", 
+                model);
+    
+            if (result?.Status == (int)HttpStatusCode.OK)
+            {
+                _notyfService.Success("Optimization marked as implemented successfully.");
+        
+                // Get the component ID to redirect back to details
+                var suggestion = await Get<OptimizationSuggestion>(
+                    await GetHttpClient(), 
+                    "api/screenComponents/getOptimizationSuggestion", 
+                    model.OptimizationSuggestionId);
+        
+                return RedirectToAction("Details", new { id = suggestion.ComponentId });
+            }
+    
+            _notyfService.Error("Failed to mark optimization as implemented.");
+            return RedirectToAction("Index", "Home");
         }
         
 }

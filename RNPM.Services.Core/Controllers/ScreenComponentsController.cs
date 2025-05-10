@@ -126,14 +126,25 @@ public class ScreenComponentsController : Controller
 
         return Ok(items.OrderByDescending(d => d.CreatedDate).ToList());
     }
-
+    
     [HttpGet("{componentId}", Name = nameof(GetComponent))]
     public async Task<IActionResult> GetComponent(string componentId)
     {
-        var component = await _context.ScreenComponents.Include(c => c.ScreenComponentRenders).FirstOrDefaultAsync(c => c.Id == componentId);
+        var component = await _context.ScreenComponents
+            .Include(c => c.ScreenComponentRenders)
+            .Include(c => c.OptimizationSuggestions)
+            .FirstOrDefaultAsync(c => c.Id == componentId);
+        
+        if (component == null)
+        {
+            return NotFound("Component not found");
+        }
+    
         var items = await _context.ScreenComponentRenders
-            .Where(d => d.IsActive && !d.IsDeleted && d.ComponentId == componentId).OrderByDescending(d =>d.Date)
+            .Where(d => d.IsActive && !d.IsDeleted && d.ComponentId == componentId)
+            .OrderByDescending(d => d.Date)
             .ToListAsync();
+        
         List<ScreenComponentRender> recentRenders;
         if (items.Count < 100)
         {
@@ -141,79 +152,42 @@ public class ScreenComponentsController : Controller
         }
         else
         {
-           recentRenders = items.GetRange(0, 100); // Get the first 15 items
+            recentRenders = items.GetRange(0, 100); // Get the first 100 items
         }
-        var sum = (recentRenders.Sum(i => i.RenderTime));
-        var average = sum / recentRenders.Count;
-        MetricStatus status;
-        string insight;
-        string comment;
-        if (average < 50)
+    
+        // Calculate average only, without insights or status
+        decimal average = 0;
+    
+        if (recentRenders.Count > 0)
         {
-            status = MetricStatus.Excellent;
-            insight = "Render time is excellent";
-            comment = "Your component is rendering very quickly, which is great for user experience. " +
-                      "To maintain this performance, ensure your component's complexity remains low, " +
-                      "optimize your algorithms, and avoid unnecessary re-renders. Keep monitoring " +
-                      "performance as you add new features to ensure it remains excellent.";
-        } else if (average < 100)
-        {
-            status = MetricStatus.Good;
-            insight = "Render time is good.";
-            comment = "Your component is performing well. To improve to excellent, consider optimizing " +
-                      "state management, reducing the complexity of your component tree, and ensuring " +
-                      "that heavy computations are performed outside the render cycle. Pay attention " +
-                      "to any potential bottlenecks.";
-        } else if (average < 200) {
-            status = MetricStatus.Acceptable;
-            insight = "Render time is acceptable.";
-            comment = "While your component's performance is acceptable, there is room for improvement. " +
-                      "Review the component's lifecycle methods and ensure that any expensive operations " +
-                      "are minimized. Consider using techniques such as memoization to prevent unnecessary " +
-                      "re-renders.";
-        } else if (average < 500) {
-            status = MetricStatus.NeedsImprovement;
-            insight = "Render time needs improvement.";
-            comment = "Your component's render time is starting to impact user experience. Investigate " +
-                      "the causes of slow rendering, such as large data sets being processed during render, " +
-                      "or heavy use of synchronous operations. Optimize your rendering logic, and consider " +
-                      "breaking down complex components into smaller, more manageable pieces.";
-        } else if (average < 1000)
-        {
-            status = MetricStatus.Poor;
-            insight = "Render time is poor.";
-            comment = "The render time is significantly affecting user experience. Common factors include " +
-                      "inefficient data handling, too many re-renders, and complex component structures. " +
-                      "Profile your application to identify bottlenecks. Implement asynchronous data loading " +
-                      "and optimize the component's rendering logic.";
-        } else
-        {
-            status = MetricStatus.VeryPoor;
-            insight = "Render time is very poor.";
-            comment = "The render time is unacceptable and will likely lead to a poor user experience. " +
-                      "Consider this a critical issue that needs immediate attention. Profile your component " +
-                      "to find the exact causes of the delay. Common solutions include debouncing rapid state " +
-                      "changes, using lazy loading for heavy components, and ensuring that your rendering logic " +
-                      "is as efficient as possible.";
+            var sum = (recentRenders.Sum(i => i.RenderTime));
+            average = sum / recentRenders.Count;
         }
-        
+    
         var stat = new RenderTimeStatisticsViewModel()
         {
-            Name = component?.Name,
-            Average = average,
-            Insight = insight,
-            Comment = comment,
-            Status = status
+            Name = component.Name,
+            Average = average
+            // No longer including Insight, Comment, or Status
         };
+
+        // Get optimization suggestions
+        var optimizationSuggestions = await _context.OptimizationSuggestions
+            .Where(s => s.ComponentId == componentId && s.IsActive && !s.IsDeleted)
+            .OrderByDescending(s => s.CreatedDate)
+            .ToListAsync();
 
         var componentDetails = new ComponentViewModel()
         {
             Id = componentId,
-            ApplicationId = component?.ApplicationId,
-            Name = component?.Name,
+            ApplicationId = component.ApplicationId,
+            Name = component.Name,
             Statistics = stat,
-            ScreenComponentRenders = recentRenders
+            ScreenComponentRenders = recentRenders,
+            OptimizationSuggestions = optimizationSuggestions,
+            Threshold = component.Threshold
         };
+    
         return Ok(componentDetails);
     }
     
@@ -276,5 +250,72 @@ public class ScreenComponentsController : Controller
                 throw;
             }
         }
+    }
+    
+    [HttpPost(Name = nameof(MarkOptimizationImplemented))]
+    public async Task<IActionResult> MarkOptimizationImplemented([FromBody] MarkOptimizationImplementedViewModel model)
+    {
+        var suggestion = await _context.OptimizationSuggestions
+            .FirstOrDefaultAsync(s => s.Id == model.OptimizationSuggestionId)
+            .ConfigureAwait(false);
+    
+        if (suggestion == null)
+        {
+            return BadRequest(new ApiResponse((int)HttpStatusCode.BadRequest, "Optimization suggestion not found"));
+        }
+    
+        suggestion.IsImplemented = true;
+        suggestion.ImplementedDate = DateTime.Now;
+    
+        if (model.ResetMeasurements)
+        {
+            // Get the component
+            var component = await _context.ScreenComponents
+                .FirstOrDefaultAsync(c => c.Id == suggestion.ComponentId)
+                .ConfigureAwait(false);
+            
+            if (component != null)
+            {
+                // Reset the threshold if needed
+                component.Threshold = model.NewThreshold ?? component.Threshold;
+                _context.Update(component);
+            
+                // Remove old render measurements if requested
+                if (model.ClearOldMeasurements)
+                {
+                    var renders = await _context.ScreenComponentRenders
+                        .Where(r => r.ComponentId == component.Id)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+
+                    foreach (var render in renders)
+                    {
+                        render.IsDeleted = true;
+                        render.IsActive = false;
+                    }
+
+                    _context.UpdateRange(renders);
+                }
+            }
+        }
+    
+        _context.Update(suggestion);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
+    
+        return Ok(new ApiOkResponse(suggestion, "Optimization marked as implemented"));
+    }
+    
+    [HttpGet("{id}", Name = nameof(GetOptimizationSuggestion))]
+    public async Task<IActionResult> GetOptimizationSuggestion(string id)
+    {
+        var suggestion = await _context.OptimizationSuggestions
+            .FirstOrDefaultAsync(s => s.Id == id);
+        
+        if (suggestion == null)
+        {
+            return NotFound("Optimization suggestion not found");
+        }
+    
+        return Ok(suggestion);
     }
 }

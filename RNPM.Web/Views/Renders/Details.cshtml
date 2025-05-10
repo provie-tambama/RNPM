@@ -6,8 +6,8 @@
     ViewData["Title"] = "Details";
     Layout = "_Layout";
     var component = (ComponentViewModel)ViewBag.ScreenComponent;
-  string averageString = component.Statistics?.Average?.ToString("###.000") ?? "0.000";
-  var renderAverages = (List<DailyAverageViewModel>)ViewBag.RenderAverages;
+    string averageString = component.Statistics?.Average?.ToString("###.000") ?? "0.000";
+    var renderAverages = (List<DailyAverageViewModel>)ViewBag.RenderAverages;
 }
 
 <div id="content" class="app-content">
@@ -17,101 +17,239 @@
     
   <div class="col-12">
     
+    <!-- Optimization Suggestions Panel (Now at the top for emphasis) -->
+    <div class="panel panel-inverse" data-sortable-id="table-basic-6">
+      <div class="panel-heading">
+        <h4 class="panel-title">ML Optimization Suggestions</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+        </div>
+      </div>
+      
+      <div class="panel-body">
+        @if (component.OptimizationSuggestions != null && component.OptimizationSuggestions.Any())
+        {
+          var mostRecentSuggestion = component.OptimizationSuggestions.OrderByDescending(s => s.CreatedDate).FirstOrDefault();
+          
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="m-0">Latest Optimization Suggestion</h5>
+              <span class="badge bg-primary">@mostRecentSuggestion.CreatedDate.ToString("MMM dd, yyyy HH:mm")</span>
+            </div>
+            
+            @if (mostRecentSuggestion.IsImplemented)
+            {
+              <div class="alert alert-success">
+                <i class="fa fa-check-circle"></i> This optimization was implemented on @mostRecentSuggestion.ImplementedDate.ToString("MMM dd, yyyy HH:mm")
+              </div>
+            }
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h6 class="mb-0">Original Code</h6>
+                  </div>
+                  <div class="card-body bg-light">
+                    <pre style="max-height: 400px; overflow-y: auto;"><code class="language-javascript">@mostRecentSuggestion.Prompt</code></pre>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header">
+                    <h6 class="mb-0">Suggested Optimization</h6>
+                  </div>
+                  <div class="card-body bg-light">
+                    <pre style="max-height: 400px; overflow-y: auto;"><code class="language-javascript">@mostRecentSuggestion.Suggestion</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            @if (!mostRecentSuggestion.IsImplemented)
+            {
+              <div class="mt-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#implementModal">
+                  <i class="fa fa-check me-1"></i> Mark as Implemented
+                </button>
+              </div>
+              
+              <!-- Implementation Modal -->
+              <div class="modal fade" id="implementModal" tabindex="-1" aria-labelledby="implementModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form asp-controller="Renders" asp-action="MarkImplemented" method="post">
+                      <input type="hidden" name="OptimizationSuggestionId" value="@mostRecentSuggestion.Id" />
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="implementModalLabel">Mark Optimization as Implemented</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="form-check mb-3">
+                          <input class="form-check-input" type="checkbox" id="resetMeasurements" name="ResetMeasurements">
+                          <label class="form-check-label" for="resetMeasurements">
+                            Reset measurement tracking for this component
+                          </label>
+                        </div>
+                        
+                        <div id="resetOptions" class="ms-4 d-none">
+                          <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="clearOldMeasurements" name="ClearOldMeasurements">
+                            <label class="form-check-label" for="clearOldMeasurements">
+                              Clear all previous measurements
+                            </label>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label for="newThreshold" class="form-label">New threshold (ms):</label>
+                            <input type="number" class="form-control" id="newThreshold" name="NewThreshold" 
+                                  value="@component.Threshold" step="0.1" min="0">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Implementation</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+          
+          @if (component.OptimizationSuggestions.Count > 1)
+          {
+            <hr />
+            <h5>Previous Optimization Suggestions</h5>
+            <div class="accordion" id="previousSuggestions">
+              @{
+                var index = 0;
+                foreach (var suggestion in component.OptimizationSuggestions.Skip(1).OrderByDescending(s => s.CreatedDate))
+                {
+                  index++;
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading@(index)">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                              data-bs-target="#collapse@(index)" aria-expanded="false" aria-controls="collapse@(index)">
+                        Suggestion from @suggestion.CreatedDate.ToString("MMM dd, yyyy HH:mm")
+                        @if (suggestion.IsImplemented)
+                        {
+                          <span class="badge bg-success ms-2">Implemented</span>
+                        }
+                      </button>
+                    </h2>
+                    <div id="collapse@(index)" class="accordion-collapse collapse" aria-labelledby="heading@(index)" 
+                          data-bs-parent="#previousSuggestions">
+                      <div class="accordion-body">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <h6>Original Code</h6>
+                            <pre style="max-height: 300px; overflow-y: auto;"><code class="language-javascript">@suggestion.Prompt</code></pre>
+                          </div>
+                          <div class="col-md-6">
+                            <h6>Suggested Optimization</h6>
+                            <pre style="max-height: 300px; overflow-y: auto;"><code class="language-javascript">@suggestion.Suggestion</code></pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          }
+        }
+        else
+        {
+          <div class="alert alert-info">
+            <i class="fa fa-info-circle me-2"></i> No optimization suggestions available for this component.
+            <p class="mt-2 mb-0">Suggestions are automatically generated when a component exceeds its render time threshold.</p>
+          </div>
+        }
+      </div>
+    </div>
+    
+    <!-- Render Time Chart Panel -->
     <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
       <div class="panel-heading">
-        <h4 class="panel-title">Averages</h4>
+        <h4 class="panel-title">Render Time History</h4>
         <div class="panel-heading-btn">
           <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
         </div>
       </div>
       <div class="panel-body">
-        <p class="h4">Average Component Render Time: <b>@averageString ms</b>
-                    @switch (component.Statistics?.Status)
-                    {
-                      case MetricStatus.Excellent:
-                        <span class="badge bg-success">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      case MetricStatus.Good:
-                        <span class="badge bg-primary">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      case MetricStatus.Acceptable:
-                        <span class="badge bg-info">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      case MetricStatus.NeedsImprovement:
-                        <span class="badge bg-warning">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      case MetricStatus.Poor:
-                        <span class="badge bg-danger">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      case MetricStatus.VeryPoor:
-                        <span class="badge bg-dark">@component.Statistics?.Status.ToString()</span>
-                        break;
-                      default:
-                        <span class="badge bg-secondary">Unknown</span>
-                        break;
-                    }
-          </p>
-                <h6>@component.Statistics?.Insight</h6>
-                <p>
-                  @component.Statistics?.Comment
-                </p>
-        <p class="h5">Daily Averages:</p>
-        <div id="renders-chart" class="h-250px"></div>
-      </div>
-      <div class="hljs-wrapper">
+        <div id="renders-chart" class="h-300px"></div>
+        <div class="small text-muted text-center mt-2">Daily average render times (milliseconds) for the last 15 days</div>
       </div>
     </div>
+
+    <!-- Recent Metrics Panel -->
     <div class="panel panel-inverse" data-sortable-id="table-basic-5">
-              
-              <div class="panel-heading">
-              <h4 class="panel-title">Most recent metrics</h4>
-              <div class="panel-heading-btn">
-              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-              </div>
-              </div>
-              
-              
-              <div class="panel-body">
-              
-              <div class="table-responsive">
-              <table class="table table-striped mb-0">
-              <thead>
+      <div class="panel-heading">
+        <h4 class="panel-title">Recent Render Measurements</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+        </div>
+      </div>
+      
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped mb-0">
+            <thead>
               <tr>
-              <th>Metric</th>
-              <th>Date Recorded</th>
+                <th>Render Time</th>
+                <th>Date Recorded</th>
               </tr>
-              </thead>
-              <tbody>
-              @if (component.ScreenComponentRenders != null)
+            </thead>
+            <tbody>
+              @if (component.ScreenComponentRenders != null && component.ScreenComponentRenders.Any())
               {
                 foreach (var render in component.ScreenComponentRenders)
                 {
                   <tr>
-                    <td>@render.RenderTime.ToString("###.000")ms</td>
+                    <td>@render.RenderTime.ToString("###.000") ms</td>
                     <td>@render.Date</td>
                   </tr>
                 }
               }
-              </tbody>
-              </table>
-              </div>
-              
-              </div>
-              
-              
-              <div class="hljs-wrapper">
-              <pre><code class="html" data-url="../assets/data/table-basic/code-5.json"></code></pre>
-              </div>
-              
+              else
+              {
+                <tr>
+                  <td colspan="2" class="text-center">No render measurements available</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
+    </div>
     
   </div>
 </div>
 
 @section Scripts{
+  <!-- Chart Rendering Script -->
   <script type="4eaa729db74b6f489294f4e0-text/javascript">
   $(document).ready(function () {
-  handleRendersChart()
+    handleRendersChart();
+    
+    // Toggle reset options visibility
+    $('#resetMeasurements').change(function() {
+      if($(this).is(':checked')) {
+        $('#resetOptions').removeClass('d-none');
+      } else {
+        $('#resetOptions').addClass('d-none');
+      }
+    });
+    
+    // Apply syntax highlighting to code blocks
+    if(typeof hljs !== 'undefined') {
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    }
   });
   </script>
   <script>
@@ -127,74 +265,72 @@ var handleRendersChart = function () {
   if ($("#renders-chart").length !== 0) {
     var renderAverages = @Html.Raw(JsonConvert.SerializeObject(renderAverages));
     if (renderAverages && renderAverages.length > 0) {
-    var data = renderAverages.map((item, index) => [index + 1, item.Average]);
-    var xLabel = renderAverages.map((item, index) => [index + 1, item.Date]);
-    }
-
-    else {
-      alert("No Render Values Available");
-      location.href("#");
-      }
-
-    $.plot(
-      $("#renders-chart"),
-      [
+      var data = renderAverages.map((item, index) => [index + 1, item.Average]);
+      var xLabel = renderAverages.map((item, index) => [index + 1, new Date(item.Date).toLocaleDateString()]);
+      
+      $.plot(
+        $("#renders-chart"),
+        [
+          {
+            data: data,
+            label: "Render Time (ms)",
+            color: app.color.blue,
+            lines: { show: true, fill: false, lineWidth: 2 },
+            points: { show: true, radius: 3, fillColor: app.color.componentBg },
+            shadowSize: 0,
+          }
+        ],
         {
-          data: data,
-          label: "Render Time",
-          color: app.color.blue,
-          lines: { show: true, fill: false, lineWidth: 2 },
-          points: { show: true, radius: 3, fillColor: app.color.componentBg },
-          shadowSize: 0,
+          xaxis: {
+            ticks: xLabel,
+            tickDecimals: 0,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          yaxis: {
+            ticks: 10,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            min: 0,
+          },
+          grid: {
+            hoverable: true,
+            clickable: true,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            borderWidth: 1,
+            backgroundColor: "transparent",
+            borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          legend: {
+            labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+            margin: 10,
+            noColumns: 1,
+            show: true,
+          },
         }
-      ],
-      {
-        xaxis: {
-          ticks: xLabel,
-          tickDecimals: 0,
-          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
-        },
-        yaxis: {
-          ticks: 10,
-          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
-          min: 0,
-          max: 200,
-        },
-        grid: {
-          hoverable: true,
-          clickable: true,
-          tickColor: "rgba(" + app.color.darkRgb + ", .2)",
-          borderWidth: 1,
-          backgroundColor: "transparent",
-          borderColor: "rgba(" + app.color.darkRgb + ", .2)",
-        },
-        legend: {
-          labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
-          margin: 10,
-          noColumns: 1,
-          show: true,
-        },
-      }
-    );
-    var previousPoint = null;
-    $("#renders-chart").bind("plothover", function (event, pos, item) {
-      $("#x").text(pos.x.toFixed(2));
-      $("#y").text(pos.y.toFixed(2));
-      if (item) {
-        if (previousPoint !== item.dataIndex) {
-          previousPoint = item.dataIndex;
+      );
+      var previousPoint = null;
+      $("#renders-chart").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(2));
+        $("#y").text(pos.y.toFixed(2));
+        if (item) {
+          if (previousPoint !== item.dataIndex) {
+            previousPoint = item.dataIndex;
+            $("#tooltip").remove();
+            var y = item.datapoint[1].toFixed(2);
+            var date = renderAverages[item.dataIndex].Date;
+            var formattedDate = new Date(date).toLocaleDateString();
+            var content = formattedDate + ": " + y + " ms";
+            showTooltip(item.pageX, item.pageY, content);
+          }
+        } else {
           $("#tooltip").remove();
-          var y = item.datapoint[1].toFixed(2);
-          var content = item.series.label + " " + y;
-          showTooltip(item.pageX, item.pageY, content);
+          previousPoint = null;
         }
-      } else {
-        $("#tooltip").remove();
-        previousPoint = null;
-      }
-      event.preventDefault();
-    });
+        event.preventDefault();
+      });
+    } else {
+      $("#renders-chart").html('<div class="alert alert-info m-3">No render data available for charting</div>');
+    }
   }
-  };
+};
 </script>
 }
