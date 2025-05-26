@@ -7,6 +7,7 @@ namespace RNPM.CodeOptimizer.Services;
 public interface ICodeOptimizerService
 {
     Task<CodeOptimizationResponse> OptimizeCodeAsync(CodeOptimizationRequest request);
+    Task<CodeOptimizationResponse> OptimizeCodeSubAsync(CodeOptimizationRequest request);
     
     Task<bool> IsServiceAvailableAsync();
 }

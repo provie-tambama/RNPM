@@ -506,6 +506,9 @@ namespace RNPM.Common.Migrations
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("ImplementedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -513,6 +516,9 @@ namespace RNPM.Common.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsImplemented")
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")

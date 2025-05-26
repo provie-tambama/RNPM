@@ -12,7 +12,7 @@ import { registerComponentSource } from '../../src/utils/sourceRegistry';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const App = () => { 'noHermes';'show source'
+const App = () => {'show source'
 useEffect(() => {
   getSavedMetrics().then((data) => {
     //TODO: console.log('Saved metrics:', data);

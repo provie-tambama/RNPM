@@ -32,6 +32,9 @@ const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }
   );
 };
 
+var code = HomeScreen.toString();
+console.log(code);
+
 export default withRenderTimeMonitor(HomeScreen);
 
 const styles = StyleSheet.create({

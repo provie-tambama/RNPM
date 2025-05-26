@@ -1,7 +1,7 @@
 // src/performance/withRenderTimeMonitor.tsx
 import React, { useEffect, useRef } from 'react';
 import { createComponentRenderMetric, submitComponentCode } from '../utils/api';
-import { getComponentSource} from '../utils/sourceRegistry';
+import { getComponentSource } from '../utils/sourceRegistry';
 
 type WithRenderTimeMonitorProps = {
   uniqueAccessCode: string;
@@ -40,6 +40,7 @@ const withRenderTimeMonitor = <P extends object>(
           try {
             // Get component source code
             const sourceCode = getComponentSource(componentName);
+            console.log('Component source code:', sourceCode);
             if (sourceCode) {
               await submitComponentCode(uniqueAccessCode, componentName, sourceCode);
             }

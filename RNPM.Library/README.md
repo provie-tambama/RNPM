@@ -1,11 +1,11 @@
-# react-native-performance-monitor
+# @provie17/react-native-performance-monitor
 
 For monitoring the performance of React Native Apps
 
 ## Installation
 
 ```sh
-npm install react-native-performance-monitor
+npm install @provie17/react-native-performance-monitor
 ```
 
 ## Usage

@@ -4,7 +4,6 @@ const pkg = require('../package.json');
 
 // Path to the babel plugin in the library
 const babelPluginPath = path.resolve(__dirname, '../src/babel-plugins/react-native-source-extractor.js');
-
 const root = path.resolve(__dirname, '..');
 
 module.exports = function (api) {

@@ -9,6 +9,7 @@ using RNPM.Common.Data;
 using RNPM.Common.Data.Enums;
 using RNPM.Common.Models;
 using RNPM.Common.ViewModels.Core;
+using RNPM.Common.ViewModels.Update;
 using Serilog;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
@@ -318,4 +319,32 @@ public class ScreenComponentsController : Controller
     
         return Ok(suggestion);
     }
+    
+    [HttpPut("{id}", Name = nameof(UpdateComponent))]
+    public async Task<IActionResult> UpdateComponent(UpdateScreenComponentViewModel vm)
+    {
+        if (string.IsNullOrWhiteSpace(vm.Id) || string.IsNullOrWhiteSpace(vm.Name))
+        {
+            return BadRequest(new ApiResponse(400,$"Please enter correct component details"));
+        }
+        var component = await _context.ScreenComponents
+            .FirstOrDefaultAsync(c => c.Id == vm.Id);
+        
+        if (component == null)
+        {
+            return NotFound("Component not found");
+        }
+
+        if (component.IsDeleted || !component.IsActive)
+        {
+            return BadRequest(new ApiResponse(400,$"Screen Component {component.Name} was deleted"));
+        }
+
+        component.Threshold = vm.Threshold;
+        component.Name = vm.Name;
+        _context.Update(component);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
+        return Ok(new ApiOkResponse(component, "Component update successfully"));
+    }
+    
 }

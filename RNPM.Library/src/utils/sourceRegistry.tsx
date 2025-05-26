@@ -30,6 +30,16 @@ type SourceEntry = {
   }
   
   // Make the registry globally available for the Babel plugin
-  if (typeof global !== 'undefined') {
-    (global as any).__RNPM_registerComponentSource = registerComponentSource;
+if (typeof global !== 'undefined') {
+  (global as any).__RNPM_registerComponentSource = registerComponentSource;
+  
+  // Process any queued registrations
+  const queue = (global as any).__RNPM_registerComponentSource_queue || [];
+  if (queue.length > 0) {
+    queue.forEach((item: {name: string, source: string, path?: string}) => {
+      registerComponentSource(item.name, item.source, item.path);
+    });
+    // Clear the queue
+    queue.length = 0;
   }
+}

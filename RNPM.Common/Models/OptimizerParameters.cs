@@ -5,6 +5,8 @@ public class OptimizerParameters
 
     public const string Parameters = "OptimizerParameters";
     public string HuggingFaceApiUrl { get; set; } = "https://api-inference.huggingface.co";
+    public string AuthToken { get; set; }
+    public string OpenKey { get; set; }
     
     /// <summary>
     /// The API token for authenticating with the HuggingFace API.

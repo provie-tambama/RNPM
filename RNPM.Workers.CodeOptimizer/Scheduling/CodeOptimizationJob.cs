@@ -31,6 +31,9 @@ namespace RNPM.Workers.CodeOptimizer.Scheduling
 
         public async Task Execute(IJobExecutionContext context)
         {
+            try
+            {
+            Log.Error("Here we go {0}", _dateTimeService.Now);
             var components = await _context.ScreenComponents.Where(c => c.IsActive && !c.IsDeleted).ToListAsync();
 
             foreach (var c in components)
@@ -42,41 +45,54 @@ namespace RNPM.Workers.CodeOptimizer.Scheduling
                     var sumRenderTime = screenRenderInstances.Sum(r => r.RenderTime);
                     var avgRenderTime = sumRenderTime / screenRenderInstances.Count;
 
-                    if (avgRenderTime > c.Threshold)
+                    if (avgRenderTime > c.Threshold && c.Threshold > 0)
                     {
-                        var request = new CodeOptimizationRequest
+                        if (string.IsNullOrWhiteSpace(c.SourceCode))
                         {
-                            ComponentName = c.Name,
-                            Code = c.SourceCode,
-                            ComponentId = c.Id
-                        };
-                        var suggestionResponse = await _codeOptimizerService.OptimizeCodeAsync(request);
-
-                        if (suggestionResponse.Success)
-                        {
-                            c.OptimizationSuggestion = suggestionResponse.OptimizationSuggestion;
-                            _context.Update(c);
-
-                            var optimizationSuggestion = new OptimizationSuggestion
-                            {
-                                ComponentId = c.Id,
-                                Prompt = c.SourceCode,
-                                Suggestion = suggestionResponse.OptimizationSuggestion,
-                                Success = true,
-                                Message = suggestionResponse.Message,
-                            };
-
-                            await _context.AddAsync(optimizationSuggestion);
-                            await _context.SaveChangesAsync().ConfigureAwait(false);
+                            Log.Error("Code not available for component {0} - {1}",c.Name, _dateTimeService.Now);
                         }
                         else
                         {
-                            Log.Error("Suggestion unsuccessful: {}",suggestionResponse.Message);
+                            var request = new CodeOptimizationRequest
+                            {
+                                ComponentName = c.Name,
+                                Code = c.SourceCode,
+                                ComponentId = c.Id
+                            };
+                            var suggestionResponse = await _codeOptimizerService.OptimizeCodeSubAsync(request);
+
+                            if (suggestionResponse.Success)
+                            {
+                                c.OptimizationSuggestion = suggestionResponse.OptimizationSuggestion;
+                                _context.Update(c);
+
+                                var optimizationSuggestion = new OptimizationSuggestion
+                                {
+                                    ComponentId = c.Id,
+                                    Prompt = c.SourceCode,
+                                    Suggestion = suggestionResponse.OptimizationSuggestion,
+                                    Success = true,
+                                    Message = suggestionResponse.Message,
+                                };
+
+                                await _context.AddAsync(optimizationSuggestion);
+                                await _context.SaveChangesAsync().ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                Log.Error("Suggestion unsuccessful: {}",suggestionResponse.Message);
+                            }
                         }
                         
                     }
                 }
             }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error in Code Optimizer Job: {0}", e.Message);
+            }
+
         }
     }
 }

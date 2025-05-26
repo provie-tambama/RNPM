@@ -11,8 +11,10 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Reflection;
+using RNPM.CodeOptimizer.Services;
 using RNPM.Common.Data;
 using RNPM.Common.Interfaces;
+using RNPM.Common.Models;
 using RNPM.Common.Services;
 using RNPM.Workers.CodeOptimizer;
 using RNPM.Workers.CodeOptimizer.Scheduling;
@@ -56,24 +58,11 @@ public class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddHostedService<Worker>();
-
+                services.Configure<OptimizerParameters>(options => hostContext.Configuration.GetSection(OptimizerParameters.Parameters).Bind(options));
                 services.AddHttpClient();
-                services.AddHttpClient("Esolutions", client =>
-                {
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", hostContext.Configuration["EsolutionsSettings:BillPaymentsApiToken"]);
-                    client.Timeout = TimeSpan.FromMinutes(1);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                {
-                    var httpClientHandler = new HttpClientHandler();
-                    httpClientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                    return httpClientHandler;
-                });
 
                 var migrationsAssembly = typeof(Program).GetTypeInfo().Assembly.GetName().Name;
-                string connectionString = hostContext.Configuration.GetConnectionString("DohweConnection");
+                string connectionString = hostContext.Configuration.GetConnectionString("DefaultConnection");
 
                 // For Entity Framework
                 services.AddDbContext<RnpmDbContext>(options =>
@@ -84,9 +73,9 @@ public class Program
                 
                 services.AddTransient<IDateTimeService, DateTimeService>();
                 services.AddTransient<ICurrentUserService, CurrentUserService>();
-
+                services.AddTransient<ICodeOptimizerService, CodeOptimizerService>();
                 //services.AddTransient<IGeneratorService, GeneratorService>();
-
+                services.AddSingleton<ScheduledJobRunner>();
                 services.AddSingleton<IJobFactory, SchedulerJobFactory>();
                 services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
                 services.AddScoped<CodeOptimizationJob>();
