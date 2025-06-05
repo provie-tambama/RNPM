@@ -38,6 +38,9 @@
                                         <a href="@Url.Action("Details", "Renders", new { id = component.Id })" class="btn btn-sm btn-primary">
                                             <i class="fa fa-search me-1"></i> Details
                                         </a>
+                                        <a href="#editModal-@component.Id" data-bs-toggle="modal" class="btn btn-sm btn-info ms-1">
+                                            <i class="fa fa-edit me-1"></i> Edit
+                                        </a>
                                         <a href="@Url.Action("DeleteComponent", "Renders", new { id = component.Id })" class="btn btn-sm btn-danger ms-1">
                                             <i class="fa fa-trash me-1"></i> Delete
                                         </a>
@@ -57,3 +60,149 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Modals -->
+@if (components != null && components.Any())
+{
+    foreach (var component in components)
+    {
+        <div class="modal fade" id="editModal-@component.Id" tabindex="-1" aria-labelledby="editModalLabel-@component.Id" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form asp-controller="Renders" asp-action="UpdateComponent" method="post" class="update-component-form">
+                        <input type="hidden" name="Id" value="@component.Id" />
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel-@component.Id">Edit Component: @component.Name</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name-@component.Id" class="form-label">Component Name</label>
+                                <input type="text" class="form-control" id="name-@component.Id" name="Name" value="@component.Name" required>
+                                <div class="invalid-feedback">
+                                    Component name is required.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="threshold-@component.Id" class="form-label">
+                                    Render Time Threshold (ms)
+                                    <i class="fa fa-info-circle ms-1" data-bs-toggle="tooltip" 
+                                       title="When the average render time exceeds this threshold, optimization suggestions will be generated"></i>
+                                </label>
+                                <input type="number" class="form-control" id="threshold-@component.Id" name="Threshold" 
+                                       value="@component.Threshold" step="0.1" min="0" required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid threshold value (must be 0 or greater).
+                                </div>
+                                @if (component.Statistics?.Average != null)
+                                {
+                                    <small class="form-text text-muted">
+                                        All time average render time: @component.Statistics.Average.ToString("###.000") ms
+                                    </small>
+                                }
+                                
+                                @if (component.Statistics?.Last100Average != null)
+                                {
+                                    <small class="form-text text-muted">
+                                        Last 100 days average render time: @component.Statistics.Last100Average.ToString("###.000") ms
+                                    </small>
+                                }
+
+                                @if (component.Statistics?.MonthlyAverage != null)
+                                {
+                                    <small class="form-text text-muted">
+                                        Last 30 days average render time: @component.Statistics.MonthlyAverage.ToString("###.000") ms
+                                    </small>
+                                }
+                                @if (component.Statistics?.WeeklyAverage != null)
+                                {
+                                    <small class="form-text text-muted">
+                                        Last 7 days average render time: @component.Statistics.WeeklyAverage.ToString("###.000") ms
+                                    </small>
+                                }
+                                @if (component.Statistics?.DailyAverage != null)
+                                {
+                                    <small class="form-text text-muted">
+                                        Today's average render time: @component.Statistics.DailyAverage.ToString("###.000") ms
+                                    </small>
+                                }
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="clearMeasurements-@component.Id" name="ClearMeasurements">
+                                    <label class="form-check-label" for="clearMeasurements-@component.Id">
+                                        Clear all existing render measurements
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+            
+            // Form validation
+            $('.update-component-form').on('submit', function (e) {
+                var form = $(this);
+                var isValid = true;
+                
+                // Validate name
+                var nameInput = form.find('input[name="Name"]');
+                var name = nameInput.val().trim();
+                if (name === '') {
+                    nameInput.addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    nameInput.removeClass('is-invalid');
+                }
+                
+                // Validate threshold
+                var thresholdInput = form.find('input[name="Threshold"]');
+                var threshold = parseFloat(thresholdInput.val());
+                if (isNaN(threshold) || threshold < 0) {
+                    thresholdInput.addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    thresholdInput.removeClass('is-invalid');
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Confirm clear measurements if checked
+                var clearCheckbox = form.find('input[name="ClearMeasurements"]');
+                if (clearCheckbox.is(':checked')) {
+                    if (!confirm('Are you sure you want to clear all existing measurements? This action cannot be undone.')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // Clear validation on input
+            $('.update-component-form input').on('input', function() {
+                $(this).removeClass('is-invalid');
+            });
+        });
+    </script>
+}

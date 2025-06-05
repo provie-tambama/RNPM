@@ -26,7 +26,6 @@
                         <tr>
                             <th>Request Name</th>
                             <th>Average Completion Time</th>
-                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -37,33 +36,7 @@
                             {
                                 <tr>
                                     <td>@request.Name</td>
-                                    <td>@(request.Statistics?.Average?.ToString("###.000") ?? "N/A") ms</td>
-                                    <td>
-                                        @switch (request.Statistics?.Status)
-                                        {
-                                            case MetricStatus.Excellent:
-                                                <span class="badge bg-success">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Good:
-                                                <span class="badge bg-primary">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Acceptable:
-                                                <span class="badge bg-info">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.NeedsImprovement:
-                                                <span class="badge bg-warning">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Poor:
-                                                <span class="badge bg-danger">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.VeryPoor:
-                                                <span class="badge bg-dark">@request.Statistics?.Status.ToString()</span>
-                                                break;
-                                            default:
-                                                <span class="badge bg-secondary">Unknown</span>
-                                                break;
-                                        }
-                                    </td>
+                                    <td>@(request.Average.ToString("###.000") ?? "N/A") ms</td>
                                     <td>
                                         <a href="@Url.Action("Details", "Requests", new { id = request.Id })" class="btn btn-sm btn-primary">
                                             <i class="fa fa-search me-1"></i> Details

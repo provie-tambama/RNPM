@@ -495,6 +495,7 @@ namespace RNPM.Common.Migrations
             modelBuilder.Entity("RNPM.Common.Models.OptimizationSuggestion", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ComponentId")

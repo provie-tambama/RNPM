@@ -101,59 +101,6 @@ public class NavigationsController : Controller
         }
         var sum = (recentNavigationInstances.Sum(i => i.NavigationCompletionTime));
         var average = sum / recentNavigationInstances.Count;
-        string insight;
-        MetricStatus status;
-        string comment;
-    if (average < 100)
-    {
-        status = MetricStatus.Excellent;
-        insight = "Navigation time is excellent.";
-        comment = "Your navigation performance is excellent, ensuring a seamless user experience. " +
-                  "Maintain this performance by keeping navigation logic simple and avoiding heavy computations during navigation.";
-    }
-    else if (average < 300)
-    {
-        status = MetricStatus.Good;
-        insight = "Navigation time is good.";
-        comment = "Your navigation performance is good. To achieve excellence, consider optimizing any data fetching " +
-                  "operations performed during navigation and ensure minimal component re-renders.";
-    }
-    else if (average < 500)
-    {
-        status = MetricStatus.Acceptable;
-        insight = "Navigation time is acceptable.";
-        comment = "Your navigation performance is acceptable but can be improved. Check for any unnecessary " +
-                  "operations performed during navigation and optimize them. Consider lazy loading for non-critical components.";
-    }
-    else if (average < 1000)
-    {
-        status = MetricStatus.NeedsImprovement;
-        insight = "Navigation time needs improvement.";
-        comment = "Your navigation performance needs improvement. Investigate the causes of slow navigation, " +
-                  "such as data fetching, synchronous operations, or complex component hierarchies. Optimize your navigation logic accordingly.";
-    }
-    else if (average < 2000)
-    {
-        status = MetricStatus.Poor;
-        insight = "Navigation time is poor.";
-        comment = "Your navigation performance is poor and noticeably affects user experience. Profile your navigation process " +
-                  "to identify bottlenecks and optimize data fetching and component rendering during navigation.";
-    }
-    else
-    {
-        status = MetricStatus.VeryPoor;
-        insight = "Navigation time is very poor.";
-        comment = "Your navigation performance is very poor, leading to significant delays and a frustrating user experience. " +
-                  "Consider this a critical issue. Profile your application to identify the causes of the delay and implement " +
-                  "asynchronous data loading, optimize component rendering, and simplify navigation logic.";
-    }
-        var stat = new NavigationStatisticsViewModel()
-        {
-            Average = average,
-            Insight = insight,
-            Status = status,
-            Comment = comment
-        };
 
         var navigationDetails = new NavigationViewModel()
         {
@@ -161,7 +108,7 @@ public class NavigationsController : Controller
             ApplicationId = navigation?.ApplicationId,
             FromScreen = navigation?.FromScreen,
             ToScreen = navigation?.ToScreen,
-            Statistics = stat,
+            Average = average,
             NavigationInstances = recentNavigationInstances
         };
         return Ok(navigationDetails);

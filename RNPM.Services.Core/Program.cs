@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using RNPM.API.Data;
 using RNPM.API.Services;
 using RNPM.APIServices;
@@ -28,7 +28,16 @@ try
       //  .ReadFrom.Configuration(ctx.Configuration));
 
 // Add services to the container.
-
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", 
+            builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+    });
     builder.Services.AddControllers()
         .AddNewtonsoftJson(options =>
         {
@@ -119,6 +128,8 @@ try
 
 
         builder.Services.AddAuthorization();
+        
+        builder.WebHost.UseUrls("http://192.168.100.3:7018");
 
         var app = builder.Build();
 
@@ -132,11 +143,18 @@ try
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
+    
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
-
+        
+        app.UseCors(x =>
+        {
+            x.AllowAnyOrigin();
+            x.AllowAnyMethod();
+            x.AllowAnyHeader();
+        });
+        
         app.MapControllers();
 
         app.Run();

@@ -18,6 +18,31 @@ const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }
     navigation.navigate('Profile');
   };
 
+  const testRequest = async () => {
+    fetch('http://192.168.100.3:7018/api/apiManagement/ping')
+  .then(response => {
+    // Check if the request was successful
+    console.log('Response status:', response.text);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    // Parse the JSON response
+    console.log('Response JSON:', response.json);
+    return response.json();
+  })
+  .then(data => {
+    // Do something with the data
+    console.log('ping:', data);
+    return data; // Return the data for further use if needed
+  })
+  .catch(error => {
+    // Handle any errors that occurred during the fetch
+    console.error('Fetch error:', error);
+    console.log('Error message:', error.message);
+    console.log("error.stack:", error.stack);
+  });
+  }
+
   return (
     <ScrollView style={{backgroundColor:"#fff"}}>
           <View style={styles.container}>
@@ -26,6 +51,7 @@ const HomeScreen: React.FC<{ uniqueAccessCode: string }> = ({ uniqueAccessCode }
       <Text style={{textAlign:"center", marginTop:15, marginHorizontal:10, marginBottom:30}}>To test <Text style={{fontWeight:"800"}}>Network Request Completion Time</Text>, you can navigate to the Details Screen</Text>
       <Button  title="Go to Details" onPress={handleGoToDetails} />
       <Button title="Go to Profile" onPress={handleGoToProfile} />
+      <Button title="Test Network Request" onPress={testRequest} />
     </View>
     </ScrollView>
 

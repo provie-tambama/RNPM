@@ -6,7 +6,7 @@
     ViewData["Title"] = "Details";
     Layout = "_Layout";
     var navigation = (NavigationViewModel)ViewBag.Navigation;
-  string averageString = navigation.Statistics?.Average?.ToString("###.000") ?? "0.000";
+  string averageString = navigation.Average.ToString("###.000") ?? "0.000";
   var navigationAverages = (List<DailyAverageViewModel>)ViewBag.NavigationAverages;
 }
 
@@ -26,34 +26,6 @@
       </div>
       <div class="panel-body">
         <p class="h4">Average Navigation Time: <b>@averageString ms</b>
-          @switch (navigation.Statistics?.Status)
-          {
-            case MetricStatus.Good:
-              <span class="badge bg-primary">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            case MetricStatus.Excellent:
-              <span class="badge bg-success">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            case MetricStatus.Acceptable:
-              <span class="badge bg-info">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            case MetricStatus.NeedsImprovement:
-              <span class="badge bg-warning">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            case MetricStatus.Poor:
-              <span class="badge bg-danger">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            case MetricStatus.VeryPoor:
-              <span class="badge bg-dark">@navigation.Statistics?.Status.ToString()</span>
-              break;
-            default:
-              <span class="badge bg-secondary">Unknown</span>
-              break;
-          }
-        </p>
-        <h6>@navigation.Statistics?.Insight</h6>
-        <p>
-          @navigation.Statistics?.Comment
         </p>
         <p class="h5">Most Recent Navigation Times:</p>
         <div id="navigations-chart" class="h-250px"></div>

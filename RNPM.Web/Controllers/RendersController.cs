@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RNPM.Common.Models;
 using RNPM.Common.ViewModels.Core;
+using RNPM.Common.ViewModels.Update;
 
 namespace RNPM.Web.Controllers;
 [Authorize]
@@ -70,6 +71,47 @@ public class RendersController : BaseController<RendersController>
             //return Json(value);
             return RedirectToAction("Dashboard","Home", new {id = componentToDelete.ApplicationId});
         }
+        
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateComponent(UpdateScreenComponentViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            _notyfService.Error("Invalid input. Please check the form fields.");
+            return RedirectToAction("Index", new { applicationId = ViewBag.ApplicationId });
+        }
+        
+        try
+        {
+            // Get the component to find the application ID
+            var component = await Get<ComponentViewModel>(await GetHttpClient(), "api/screenComponents/getComponent", model.Id);
+            
+            // Update the component via API
+            var result = await Add<ScreenComponent,UpdateScreenComponentViewModel>(
+                await GetHttpClient(), 
+                "api/screenComponents/updateComponent",
+                model);
+            
+            if (result?.Status == (int)HttpStatusCode.OK)
+            {
+                _notyfService.Success("Component updated successfully.");
+                
+                return RedirectToAction("Index", new { applicationId = component?.ApplicationId });
+            }
+            else
+            {
+                _notyfService.Error(result?.Title ?? "Failed to update component.");
+                return RedirectToAction("Index", new { applicationId = component?.ApplicationId });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating component {ComponentId}", model.Id);
+            _notyfService.Error("An error occurred while updating the component.");
+            return RedirectToAction("Index", "Home");
+        }
+    }
         
         [HttpPost]
         public async Task<IActionResult> MarkImplemented(MarkOptimizationImplementedViewModel model)

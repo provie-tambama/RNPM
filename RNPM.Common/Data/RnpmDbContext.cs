@@ -225,7 +225,11 @@ public class RnpmDbContext: IdentityDbContext<
             b.Property(p => p.NavigationCompletionTime)
                 .HasColumnType("decimal(18,3)");
         });
-
-
+        
+        builder.Entity<OptimizationSuggestion>(b =>
+        {
+            b.Property(n => n.Id)
+                .ValueGeneratedOnAdd();
+        });
     }
 }

@@ -96,69 +96,13 @@ public class NetworkRequestsController : Controller
         }
         var sum = (recentRequestInstances.Sum(i => i.RequestCompletionTime));
         var average = sum / recentRequestInstances.Count;
-        string insight;
-        MetricStatus status;
-        string comment;
-    if (average < 200)
-    {
-        status = MetricStatus.Excellent;
-        insight = "Network request time is excellent.";
-        comment = "Your network request performance is excellent, ensuring a smooth user experience. " +
-                  "To maintain this performance, continue optimizing your server-side code, " +
-                  "minimize payload sizes, and leverage caching where appropriate.";
-    }
-    else if (average < 500)
-    {
-        status = MetricStatus.Good;
-        insight = "Network request time is good.";
-        comment = "Your network request performance is good. To achieve excellence, consider optimizing " +
-                  "server response times, reducing payload sizes, and utilizing content delivery networks (CDNs).";
-    }
-    else if (average < 1000)
-    {
-        status = MetricStatus.Acceptable;
-        insight = "Network request time is acceptable.";
-        comment = "Your network request performance is acceptable but can be improved. Check for opportunities " +
-                  "to optimize API endpoints, compress data, and reduce the frequency of network calls.";
-    }
-    else if (average < 2000)
-    {
-        status = MetricStatus.NeedsImprovement;
-        insight = "Network request time needs improvement.";
-        comment = "Your network request performance needs improvement. Investigate slow responses, " +
-                  "optimize backend processes, and ensure efficient data handling. Consider using asynchronous " +
-                  "requests to improve perceived performance.";
-    }
-    else if (average < 3000)
-    {
-        status = MetricStatus.Poor;
-        insight = "Network request time is poor.";
-        comment = "Your network request performance is poor and negatively affects user experience. " +
-                  "Profile your API endpoints, optimize database queries, and ensure your server infrastructure " +
-                  "is adequately scaled. Implement caching strategies and reduce the amount of data transferred.";
-    }
-    else
-    {
-        status = MetricStatus.VeryPoor;
-        insight = "Network request time is very poor.";
-        comment = "Your network request performance is very poor, causing significant delays and frustration for users. " +
-                  "Consider this a critical issue. Profile your entire network stack to identify bottlenecks, " +
-                  "optimize your server and database performance, and implement aggressive caching and data compression strategies.";
-    }
-        var stat = new NetworkRequestStatisticsViewModel()
-        {
-            Average = average,
-            Insight = insight,
-            Status = status,
-            Comment = comment
-        };
 
         var requestDetails = new NetworkRequestViewModel()
         {
             Id = requestId,
             ApplicationId = request?.ApplicationId,
             Name = request?.Name,
-            Statistics = stat,
+            Average = average,
             HttpRequestInstances = recentRequestInstances
         };
         return Ok(requestDetails);

@@ -23,7 +23,7 @@ function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <NavigationObserver uniqueAccessCode='D0CB0E3ABAFC643DCE1B0C45CA572B4A'/>
+      <NavigationObserver uniqueAccessCode='925BEBE09CAD13641792961A5DEC7962'/>
       <Text style={styles.mainText}>This screen has a forced delay to measure navigation time when some processes run before the component renders</Text>
       <Button title="Go to Home" onPress={handleGoToHome} />
     </View>

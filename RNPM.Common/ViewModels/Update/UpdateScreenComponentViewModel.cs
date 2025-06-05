@@ -5,4 +5,5 @@ public class UpdateScreenComponentViewModel
     public string Id { get; set; }
     public string Name { get; set; }
     public decimal Threshold { get; set; }
+    public bool ClearMeasurements { get; set; }
 }

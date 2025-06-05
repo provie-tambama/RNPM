@@ -53,6 +53,10 @@ namespace RNPM.Workers.CodeOptimizer.Scheduling
                         }
                         else
                         {
+                            var activeOptimisationSuggestions =
+                                await _context.OptimizationSuggestions.Where(a =>
+                                    a.IsActive && !a.IsDeleted && a.IsImplemented == false).ToListAsync();
+                            if (activeOptimisationSuggestions.Count != 0) continue;
                             var request = new CodeOptimizationRequest
                             {
                                 ComponentName = c.Name,

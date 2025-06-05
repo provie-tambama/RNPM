@@ -13,7 +13,7 @@ using RNPM.Common.ViewModels.Update;
 using Serilog;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-namespace RNPM.API.Controllers;
+namespace RNPM.Services.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
 //[Authorize]
@@ -155,21 +155,43 @@ public class ScreenComponentsController : Controller
         {
             recentRenders = items.GetRange(0, 100); // Get the first 100 items
         }
+        DateTime today = DateTime.Today;
     
-        // Calculate average only, without insights or status
-        decimal average = 0;
+        // Daily average - renders from today
+        var dailyRenders = items.Where(i => i.Date.Date == today).ToList();
+        decimal dailyAvg = dailyRenders.Count > 0 
+            ? dailyRenders.Sum(i => i.RenderTime) / dailyRenders.Count 
+            : 0;
+        
+        // Weekly average - renders from the last 7 days
+        var weeklyRenders = items.Where(i => i.Date >= today.AddDays(-7)).ToList();
+        decimal weeklyAvg = weeklyRenders.Count > 0 
+            ? weeklyRenders.Sum(i => i.RenderTime) / weeklyRenders.Count 
+            : 0;
     
-        if (recentRenders.Count > 0)
-        {
-            var sum = (recentRenders.Sum(i => i.RenderTime));
-            average = sum / recentRenders.Count;
-        }
+        // Monthly average - renders from the last 30 days
+        var monthlyRenders = items.Where(i => i.Date >= today.AddDays(-30)).ToList();
+        decimal monthlyAvg = monthlyRenders.Count > 0 
+            ? monthlyRenders.Sum(i => i.RenderTime) / monthlyRenders.Count 
+            : 0;
+    
+        // Overall average from recent renders
+        decimal hundredAverage = recentRenders.Count > 0 
+            ? recentRenders.Sum(i => i.RenderTime) / recentRenders.Count 
+            : 0;
+        
+        decimal average = items.Count > 0 
+            ? items.Sum(i => i.RenderTime) / items.Count 
+            : 0;
     
         var stat = new RenderTimeStatisticsViewModel()
         {
             Name = component.Name,
+            Last100Average = hundredAverage,
+            DailyAverage = dailyAvg,
+            WeeklyAverage = weeklyAvg,
+            MonthlyAverage = monthlyAvg,
             Average = average
-            // No longer including Insight, Comment, or Status
         };
 
         // Get optimization suggestions
@@ -184,7 +206,7 @@ public class ScreenComponentsController : Controller
             ApplicationId = component.ApplicationId,
             Name = component.Name,
             Statistics = stat,
-            ScreenComponentRenders = recentRenders,
+            ScreenComponentRenders = items,
             OptimizationSuggestions = optimizationSuggestions,
             Threshold = component.Threshold
         };
@@ -320,7 +342,7 @@ public class ScreenComponentsController : Controller
         return Ok(suggestion);
     }
     
-    [HttpPut("{id}", Name = nameof(UpdateComponent))]
+    [HttpPost("", Name = nameof(UpdateComponent))]
     public async Task<IActionResult> UpdateComponent(UpdateScreenComponentViewModel vm)
     {
         if (string.IsNullOrWhiteSpace(vm.Id) || string.IsNullOrWhiteSpace(vm.Name))
@@ -344,6 +366,23 @@ public class ScreenComponentsController : Controller
         component.Name = vm.Name;
         _context.Update(component);
         await _context.SaveChangesAsync().ConfigureAwait(false);
+        
+        if (vm.ClearMeasurements)
+        {
+            var renders = await _context.ScreenComponentRenders
+                .Where(r => r.ComponentId == component.Id)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            foreach (var render in renders)
+            {
+                render.IsDeleted = true;
+                render.IsActive = false;
+            }
+
+            _context.UpdateRange(renders);
+        }
+        
         return Ok(new ApiOkResponse(component, "Component update successfully"));
     }
     

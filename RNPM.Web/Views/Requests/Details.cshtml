@@ -6,7 +6,7 @@
     ViewData["Title"] = "Details";
     Layout = "_Layout";
     var request = (NetworkRequestViewModel)ViewBag.Request;
-  string averageString = request.Statistics?.Average?.ToString("###.000") ?? "0.000";
+  string averageString = request.Average.ToString("###.000") ?? "0.000";
   var requestAverages = (List<DailyAverageViewModel>)ViewBag.RequestAverages;
 }
 
@@ -26,35 +26,6 @@
       </div>
       <div class="panel-body">
         <p class="h4">Average Request Completion Time: <b>@averageString ms</b>
-          @switch (request.Statistics?.Status)
-          {
-                                case MetricStatus.Excellent:
-                                  <span class="badge bg-success">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                case MetricStatus.Good:
-                                  <span class="badge bg-primary">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                case MetricStatus.Acceptable:
-                                  <span class="badge bg-info">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                case MetricStatus.NeedsImprovement:
-                                  <span class="badge bg-warning">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                case MetricStatus.Poor:
-                                  <span class="badge bg-danger">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                case MetricStatus.VeryPoor:
-                                  <span class="badge bg-dark">@request.Statistics?.Status.ToString()</span>
-                                  break;
-                                default:
-                                  <span class="badge bg-secondary">Unknown</span>
-                                  break;
-                              }
-                              </p>
-                <h6>@request.Statistics?.Insight</h6>
-                <p>
-                  @request.Statistics?.Comment
-                </p>
         <p class="h5">Most Recent Requests:</p>
         <div id="requests-chart" class="h-250px"></div>
       </div>

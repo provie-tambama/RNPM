@@ -6,7 +6,7 @@ const DetailsScreen = () => {
     const [data, setData] = React.useState(null);
     const fetchData = async () => {
         try {
-          const response = await fetchWithTimer('D0CB0E3ABAFC643DCE1B0C45CA572B4A','Request 2','https://jsonplaceholder.typicode.com/todos');
+          const response = await fetchWithTimer('925BEBE09CAD13641792961A5DEC7962','Request 2','https://jsonplaceholder.typicode.com/todos');
           const result = await response.json();
           setData(result);
         } catch (error) {
@@ -15,7 +15,7 @@ const DetailsScreen = () => {
       };
     const fetchTodo = async () =>{
       try {
-        const response = await fetchWithTimer('D0CB0E3ABAFC643DCE1B0C45CA572B4A','Request 1','https://jsonplaceholder.typicode.com/todos/1');
+        const response = await fetchWithTimer('925BEBE09CAD13641792961A5DEC7962','Request 1','https://jsonplaceholder.typicode.com/todos/1');
         const result = await response.json();
         setData(result);
       } catch (error) {
@@ -27,7 +27,7 @@ const DetailsScreen = () => {
     }, [data])
   return (
     <View style={styles.container}>
-        <NavigationObserver uniqueAccessCode='D0CB0E3ABAFC643DCE1B0C45CA572B4A' />
+        <NavigationObserver uniqueAccessCode='925BEBE09CAD13641792961A5DEC7962' />
       <Text style={styles.mainText}>The link below fetches data using the fetchWithTimer utility.</Text>
       <Button title="Fetch Todo 1" onPress={fetchTodo} />
       <Button title="Fetch Todos" onPress={fetchData} />

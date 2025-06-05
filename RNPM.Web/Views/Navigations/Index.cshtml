@@ -26,8 +26,6 @@
                         <tr>
                             <th>From Screen</th>
                             <th>To Screen</th>
-                            <th>Average Completion Time</th>
-                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -39,33 +37,9 @@
                                 <tr>
                                     <td>@navigation.FromScreen</td>
                                     <td>@navigation.ToScreen</td>
-                                    <td>@(navigation.Statistics?.Average?.ToString("###.000") ?? "N/A") ms</td>
-                                    <td>
-                                        @switch (navigation.Statistics?.Status)
-                                        {
-                                            case MetricStatus.Excellent:
-                                                <span class="badge bg-success">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Good:
-                                                <span class="badge bg-primary">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Acceptable:
-                                                <span class="badge bg-info">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.NeedsImprovement:
-                                                <span class="badge bg-warning">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.Poor:
-                                                <span class="badge bg-danger">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            case MetricStatus.VeryPoor:
-                                                <span class="badge bg-dark">@navigation.Statistics?.Status.ToString()</span>
-                                                break;
-                                            default:
-                                                <span class="badge bg-secondary">Unknown</span>
-                                                break;
-                                        }
-                                    </td>
+                                @*
+                                    <td>@(navigation.Average.ToString("###.000") ?? "N/A") ms</td>
+                                    *@
                                     <td>
                                         <a href="@Url.Action("Details", "Navigations", new { id = navigation.Id })" class="btn btn-sm btn-primary">
                                             <i class="fa fa-search me-1"></i> Details
