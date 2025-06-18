@@ -6,4 +6,5 @@ public class CreateNavigationViewModel
     public required string FromScreen { get; set; }
     public required string ToScreen { get; set; }
     public required Decimal NavigationCompletionTime { get; set; }
+    public DeviceInfoViewModel DeviceInfo { get; set; }
 }

@@ -36,15 +36,43 @@ public class NavigationsController : BaseController<NavigationsController>
     [HttpGet]
     public async Task<IActionResult> Details(string id)
     {
-        if (id != null)
-        {
-            await SetData(id);
-            return View();
-        }
-        else
+        if (id == null)
         {
             return RedirectToAction("Index", "Home");
         }
+        
+        var applications = await Get<List<ApplicationViewModel>>(await GetHttpClient(), "api/applications/getuserapplications",
+            GetUserId());
+        // Get navigation details with device info
+        var navigation = await Get<NavigationViewModel>(await GetHttpClient(), "api/navigations/getNavigation", id);
+    
+        // Get navigation averages with device breakdown
+        var navigationAverages = await Get<List<DailyAverageViewModel>>(await GetHttpClient(), "api/navigations/getNavigationAverages", id);
+        
+        // Get device distribution for this navigation
+        var deviceDistribution = await Get<DeviceDistributionViewModel>(await GetHttpClient(), "api/navigations/getNavigationDeviceDistribution", id);
+    
+        // Set up filter options
+        var deviceTypes = navigation.NavigationInstances
+            .Select(ni => ni.DeviceInfo?.DeviceType)
+            .Where(dt => !string.IsNullOrEmpty(dt))
+            .Distinct()
+            .ToList();
+    
+        var osVersions = navigation.NavigationInstances
+            .Select(ni => ni.DeviceInfo?.OsVersion)
+            .Where(os => !string.IsNullOrEmpty(os))
+            .Distinct()
+            .ToList();
+    
+        ViewBag.Navigation = navigation;
+        ViewBag.NavigationAverages = navigationAverages;
+        ViewBag.DeviceDistribution = deviceDistribution;
+        ViewBag.DeviceTypes = deviceTypes;
+        ViewBag.OsVersions = osVersions;
+        ViewBag.Applications = applications;
+    
+        return View();
     }
     
     private async Task SetData(string navigationId)

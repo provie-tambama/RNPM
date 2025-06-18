@@ -1,4 +1,4 @@
-namespace RNPM.API.ViewModels.Core;
+namespace RNPM.Common.ViewModels.Core;
 
 public class CreateRenderComponentViewModel
 {
@@ -7,5 +7,6 @@ public class CreateRenderComponentViewModel
     
     
     public required Decimal RenderTime { get; set; }
+    public DeviceInfoViewModel DeviceInfo { get; set; }
     
 }

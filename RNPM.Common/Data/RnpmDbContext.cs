@@ -45,6 +45,7 @@ public class RnpmDbContext: IdentityDbContext<
     public DbSet<ScreenComponent> ScreenComponents { get; set; }
     public DbSet<ScreenComponentRender> ScreenComponentRenders { get; set; }
     public DbSet<OptimizationSuggestion> OptimizationSuggestions { get; set; }
+    public DbSet<DeviceInfo> DeviceInfos { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -209,6 +210,9 @@ public class RnpmDbContext: IdentityDbContext<
                 .ValueGeneratedOnAdd();
             b.Property(p => p.RenderTime)
                 .HasColumnType("decimal(18,6)");
+            b.HasOne(r => r.DeviceInfo)
+                .WithMany(d => d.ScreenComponentRenders)
+                .HasForeignKey(r => r.DeviceInfoId);
         });
         
         builder.Entity<HttpRequestInstance>(b =>
@@ -217,6 +221,9 @@ public class RnpmDbContext: IdentityDbContext<
                 .ValueGeneratedOnAdd();
             b.Property(p => p.RequestCompletionTime)
                 .HasColumnType("decimal(18,3)");
+            b.HasOne(r => r.DeviceInfo)
+                .WithMany(d => d.HttpRequestInstances)
+                .HasForeignKey(r => r.DeviceInfoId);
         });
         builder.Entity<NavigationInstance>(b =>
         {
@@ -224,12 +231,33 @@ public class RnpmDbContext: IdentityDbContext<
                 .ValueGeneratedOnAdd();
             b.Property(p => p.NavigationCompletionTime)
                 .HasColumnType("decimal(18,3)");
+            b.HasOne(r => r.DeviceInfo)
+                .WithMany(d => d.NavigationInstances)
+                .HasForeignKey(r => r.DeviceInfoId);
         });
         
         builder.Entity<OptimizationSuggestion>(b =>
         {
             b.Property(n => n.Id)
                 .ValueGeneratedOnAdd();
+        });
+        
+        builder.Entity<DeviceInfo>(b =>
+        {
+            b.Property(n => n.Id)
+                .ValueGeneratedOnAdd();
+        
+            b.HasMany(d => d.ScreenComponentRenders)
+                .WithOne(r => r.DeviceInfo)
+                .HasForeignKey(r => r.DeviceInfoId);
+            
+            b.HasMany(d => d.NavigationInstances)
+                .WithOne(n => n.DeviceInfo)
+                .HasForeignKey(n => n.DeviceInfoId);
+            
+            b.HasMany(d => d.HttpRequestInstances)
+                .WithOne(h => h.DeviceInfo)
+                .HasForeignKey(h => h.DeviceInfoId);
         });
     }
 }

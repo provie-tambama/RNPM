@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Mime;
-using RNPM.API.ViewModels.Core;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

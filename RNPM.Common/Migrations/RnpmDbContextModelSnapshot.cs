@@ -17,7 +17,7 @@ namespace RNPM.Common.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -301,6 +301,77 @@ namespace RNPM.Common.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RNPM.Common.Models.DeviceInfo", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Brand")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DeviceYearClass")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDevice")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Manufacturer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModelName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Os")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OsBuildId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OsName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OsVersion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SupportedCpuArchitectures")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("TotalMemory")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeviceInfos");
+                });
+
             modelBuilder.Entity("RNPM.Common.Models.HttpRequestInstance", b =>
                 {
                     b.Property<string>("Id")
@@ -312,6 +383,9 @@ namespace RNPM.Common.Migrations
 
                     b.Property<string>("CreatorId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceInfoId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -338,6 +412,8 @@ namespace RNPM.Common.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeviceInfoId");
 
                     b.HasIndex("RequestId");
 
@@ -424,6 +500,9 @@ namespace RNPM.Common.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeviceInfoId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -446,6 +525,8 @@ namespace RNPM.Common.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeviceInfoId");
 
                     b.HasIndex("NavigationId");
 
@@ -614,6 +695,9 @@ namespace RNPM.Common.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeviceInfoId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -635,6 +719,8 @@ namespace RNPM.Common.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ComponentId");
+
+                    b.HasIndex("DeviceInfoId");
 
                     b.ToTable("ScreenComponentRenders");
                 });
@@ -715,9 +801,15 @@ namespace RNPM.Common.Migrations
 
             modelBuilder.Entity("RNPM.Common.Models.HttpRequestInstance", b =>
                 {
+                    b.HasOne("RNPM.Common.Models.DeviceInfo", "DeviceInfo")
+                        .WithMany("HttpRequestInstances")
+                        .HasForeignKey("DeviceInfoId");
+
                     b.HasOne("RNPM.Common.Models.NetworkRequest", "NetworkRequest")
                         .WithMany("HttpRequestInstances")
                         .HasForeignKey("RequestId");
+
+                    b.Navigation("DeviceInfo");
 
                     b.Navigation("NetworkRequest");
                 });
@@ -733,9 +825,15 @@ namespace RNPM.Common.Migrations
 
             modelBuilder.Entity("RNPM.Common.Models.NavigationInstance", b =>
                 {
+                    b.HasOne("RNPM.Common.Models.DeviceInfo", "DeviceInfo")
+                        .WithMany("NavigationInstances")
+                        .HasForeignKey("DeviceInfoId");
+
                     b.HasOne("RNPM.Common.Models.Navigation", "Navigation")
                         .WithMany("NavigationInstances")
                         .HasForeignKey("NavigationId");
+
+                    b.Navigation("DeviceInfo");
 
                     b.Navigation("Navigation");
                 });
@@ -773,6 +871,12 @@ namespace RNPM.Common.Migrations
                         .WithMany("ScreenComponentRenders")
                         .HasForeignKey("ComponentId");
 
+                    b.HasOne("RNPM.Common.Models.DeviceInfo", "DeviceInfo")
+                        .WithMany("ScreenComponentRenders")
+                        .HasForeignKey("DeviceInfoId");
+
+                    b.Navigation("DeviceInfo");
+
                     b.Navigation("ScreenComponent");
                 });
 
@@ -803,6 +907,15 @@ namespace RNPM.Common.Migrations
                     b.Navigation("Tokens");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("RNPM.Common.Models.DeviceInfo", b =>
+                {
+                    b.Navigation("HttpRequestInstances");
+
+                    b.Navigation("NavigationInstances");
+
+                    b.Navigation("ScreenComponentRenders");
                 });
 
             modelBuilder.Entity("RNPM.Common.Models.Navigation", b =>

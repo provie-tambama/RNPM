@@ -39,6 +39,7 @@ const withRenderTimeMonitor = <P extends object>(
         if (captureCode) {
           try {
             // Get component source code
+            console.log('Component name:', componentName);
             const sourceCode = getComponentSource(componentName);
             console.log('Component source code:', sourceCode);
             if (sourceCode) {

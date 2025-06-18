@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Mime;
-using RNPM.API.ViewModels.Core;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,13 +41,38 @@ public class ScreenComponentsController : Controller
         }
         var screenComponent = await _context.ScreenComponents.FirstOrDefaultAsync(d =>
             d.IsActive && !d.IsDeleted && d.Name == model.Name && d.ApplicationId == application.Id).ConfigureAwait(false);
+        
+        DeviceInfo deviceInfo = null;
+        if (model.DeviceInfo != null)
+        {
+            // Create a new device info record
+            deviceInfo = new DeviceInfo
+            {
+                // Map properties from viewmodel
+                Brand = model.DeviceInfo.Brand,
+                ModelName = model.DeviceInfo.ModelName,
+                Manufacturer = model.DeviceInfo.Manufacturer,
+                DeviceName = model.DeviceInfo.DeviceName,
+                Os = model.DeviceInfo.Os,
+                OsVersion = model.DeviceInfo.OsVersion,
+                OsName = model.DeviceInfo.OsName,
+                OsBuildId = model.DeviceInfo.OsBuildId,
+                DeviceType = model.DeviceInfo.DeviceType,
+                DeviceYearClass = model.DeviceInfo.DeviceYearClass,
+                IsDevice = model.DeviceInfo.IsDevice,
+                SupportedCpuArchitectures = model.DeviceInfo.SupportedCpuArchitectures,
+                TotalMemory = model.DeviceInfo.TotalMemory
+            };
+        
+            await _context.DeviceInfos.AddAsync(deviceInfo);
+        }
         ScreenComponentRender metric;
         Random random = new Random();
-        if (model.RenderTime > 4000)
-        {
-            var randomValue = random.NextDouble() * (1000.0 - 50.0) + 50.0;
-            model.RenderTime = Math.Round((decimal)randomValue, 8); 
-        }
+        //if (model.RenderTime > 4000)
+        //{
+        //    var randomValue = random.NextDouble() * (1000.0 - 50.0) + 50.0;
+        //    model.RenderTime = Math.Round((decimal)randomValue, 8); 
+        //}
 
         if (screenComponent == null)
         {
@@ -62,7 +86,8 @@ public class ScreenComponentsController : Controller
             {
                 ComponentId = screenComponent1.Id,
                 Date = DateTime.Now,
-                RenderTime = model.RenderTime
+                RenderTime = model.RenderTime,
+                DeviceInfoId = deviceInfo?.Id
             };
         }
         else
@@ -71,7 +96,8 @@ public class ScreenComponentsController : Controller
             {
                 ComponentId = screenComponent.Id,
                 Date = DateTime.Now,
-                RenderTime = model.RenderTime
+                RenderTime = model.RenderTime,
+                DeviceInfoId = deviceInfo?.Id
             };
         }
         await _context.AddAsync(metric).ConfigureAwait(false);

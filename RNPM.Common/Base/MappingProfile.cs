@@ -1,6 +1,4 @@
 using AutoMapper;
-using RNPM.API.ViewModels;
-using RNPM.API.ViewModels.Core;
 using RNPM.Common.Models;
 using RNPM.Common.ViewModels;
 using RNPM.Common.ViewModels.Core;

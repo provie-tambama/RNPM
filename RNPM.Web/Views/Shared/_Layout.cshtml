@@ -22,64 +22,66 @@
     <link href="~/assets/plugins/jvectormap-next/jquery-jvectormap.css" rel="stylesheet" />
     <link href="~/assets/plugins/bootstrap-datepicker/dist/css/bootstrap-datepicker.css" rel="stylesheet" />
     <link href="~/assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
+    <!-- Add this in the head section -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
     <div id="loader" class="app-loader">
         <span class="spinner"></span>
     </div>
 
-    <div id="app" class="app app-header-fixed app-sidebar-fixed ">
-        <div id="header" class="app-header">
+<div id="app" class="app app-header-fixed app-sidebar-fixed ">
+    <div id="header" class="app-header">
 
-            <div class="navbar-header">
-                <a href="@Url.Action("Index","Home")" class="navbar-brand"><span class="navbar-logo"></span> <b class="me-3px">RN</b> Perfomance</a>
-                <button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-
-            <div class="navbar-nav">
-                <div class="navbar-item navbar-user dropdown">
-                    <a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
-                        <i class="fa fa-user"></i>
-                        <span>
-                            <span class="d-none d-md-inline">@user?.Fullname</span>
-                            <b class="caret"></b>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end me-1">
-                        <div class="dropdown-divider"></div>
-                        <a asp-controller="Account" asp-action="Logout" class="dropdown-item">Log Out</a>
-                    </div>
-                </div>
-            </div>
-
+        <div class="navbar-header">
+            <a href="@Url.Action("Index","Home")" class="navbar-brand"><span class="navbar-logo"></span> <b class="me-3px">RN</b> Perfomance</a>
+            <button type="button" class="navbar-mobile-toggler" data-toggle="app-sidebar-mobile">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
         </div>
 
-        <div id="sidebar" class="app-sidebar" data-bs-theme="dark">
+        <div class="navbar-nav">
+            <div class="navbar-item navbar-user dropdown">
+                <a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                    <i class="fa fa-user"></i>
+                    <span>
+                        <span class="d-none d-md-inline">@user?.Fullname</span>
+                        <b class="caret"></b>
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end me-1">
+                    <div class="dropdown-divider"></div>
+                    <a asp-controller="Account" asp-action="Logout" class="dropdown-item">Log Out</a>
+                </div>
+            </div>
+        </div>
 
-            <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
+    </div>
 
-                <div class="menu">
-                    <div class="menu-profile">
-                        <a class="menu-profile-link">
-                            <div class="menu-profile-cover with-shadow"></div>
-                            <div class="menu-profile-image">
-                                <i class="fa fa-user"></i>
-                            </div>
-                            <div class="menu-profile-info">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-grow-1">
-                                        @user?.Fullname
-                                    </div>
+    <div id="sidebar" class="app-sidebar" data-bs-theme="dark">
+
+        <div class="app-sidebar-content" data-scrollbar="true" data-height="100%">
+
+            <div class="menu">
+                <div class="menu-profile">
+                    <a class="menu-profile-link">
+                        <div class="menu-profile-cover with-shadow"></div>
+                        <div class="menu-profile-image">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <div class="menu-profile-info">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    @user?.Fullname
                                 </div>
-                                <small>Admin</small>
                             </div>
-                        </a>
-                    </div>
-                    <div class="menu-header">Applications</div>
+                            <small>Admin</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="menu-header">Applications</div>
                 @foreach (var item in applications)
                 {
                     <div class="menu-item @(item.Id == currentApplicationId ? "active" : "")">
@@ -91,30 +93,32 @@
                         </a>
                     </div>
                 }
-                                    <div class="menu-item bg-primary">
-                                        <a href="@Url.Action("Index", "Home")" class="menu-link">
-                                            <div class="menu-icon">
-                                                <i class="fa fa-plus"></i>
-                                            </div>
-                                            <div class="menu-text">Create new</div>
-                                        </a>
-                                    </div>
+                <div class="menu-item bg-primary">
+                    <a href="@Url.Action("Index", "Home")" class="menu-link">
+                        <div class="menu-icon">
+                            <i class="fa fa-plus"></i>
+                        </div>
+                        <div class="menu-text">Create new</div>
+                    </a>
                 </div>
-
             </div>
 
         </div>
-        <div class="app-sidebar-bg" data-bs-theme="dark"></div>
-        <div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
 
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-
-        <a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
     </div>
+    <div class="app-sidebar-bg" data-bs-theme="dark"></div>
+    <div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
 
-    <script src="~/assets/js/vendor.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+
+    <a href="javascript:;" class="btn btn-icon btn-circle btn-theme btn-scroll-to-top" data-toggle="scroll-to-top"><i class="fa fa-angle-up"></i></a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="~/assets/js/vendor.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
     <script src="~/assets/js/app.min.js" type="4eaa729db74b6f489294f4e0-text/javascript"></script>
 
 

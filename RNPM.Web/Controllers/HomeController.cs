@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using RNPM.API.ViewModels;
 using RNPM.Common.Constants;
 using RNPM.Common.ViewModels;
 using RNPM.Common.ViewModels.Core;

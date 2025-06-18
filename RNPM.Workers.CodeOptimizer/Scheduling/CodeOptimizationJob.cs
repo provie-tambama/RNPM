@@ -1,9 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Quartz;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using RNPM.CodeOptimizer.Requests;
 using RNPM.CodeOptimizer.Services;
 using RNPM.Common.Data;
