@@ -10,4 +10,7 @@ public class RenderTimeStatisticsViewModel
     public decimal MonthlyAverage { get; set; }
     public decimal DailyAverage { get; set; }
     public decimal Average { get; set; }
+    
+    public List<DeviceRenderStatsViewModel> DeviceStats { get; set; } = new List<DeviceRenderStatsViewModel>();
+    public List<OsRenderStatsViewModel> OsStats { get; set; } = new List<OsRenderStatsViewModel>();
 }

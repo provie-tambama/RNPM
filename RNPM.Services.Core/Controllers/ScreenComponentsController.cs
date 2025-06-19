@@ -154,91 +154,129 @@ public class ScreenComponentsController : Controller
         return Ok(items.OrderByDescending(d => d.CreatedDate).ToList());
     }
     
-    [HttpGet("{componentId}", Name = nameof(GetComponent))]
-    public async Task<IActionResult> GetComponent(string componentId)
+[HttpGet("{componentId}", Name = nameof(GetComponent))]
+public async Task<IActionResult> GetComponent(string componentId)
+{
+    var component = await _context.ScreenComponents
+        .Include(c => c.ScreenComponentRenders)
+            .ThenInclude(r => r.DeviceInfo)  // Include device info
+        .Include(c => c.OptimizationSuggestions)
+        .FirstOrDefaultAsync(c => c.Id == componentId);
+    
+    if (component == null)
     {
-        var component = await _context.ScreenComponents
-            .Include(c => c.ScreenComponentRenders)
-            .Include(c => c.OptimizationSuggestions)
-            .FirstOrDefaultAsync(c => c.Id == componentId);
-        
-        if (component == null)
-        {
-            return NotFound("Component not found");
-        }
-    
-        var items = await _context.ScreenComponentRenders
-            .Where(d => d.IsActive && !d.IsDeleted && d.ComponentId == componentId)
-            .OrderByDescending(d => d.Date)
-            .ToListAsync();
-        
-        List<ScreenComponentRender> recentRenders;
-        if (items.Count < 100)
-        {
-            recentRenders = items; // Assign the entire list
-        }
-        else
-        {
-            recentRenders = items.GetRange(0, 100); // Get the first 100 items
-        }
-        DateTime today = DateTime.Today;
-    
-        // Daily average - renders from today
-        var dailyRenders = items.Where(i => i.Date.Date == today).ToList();
-        decimal dailyAvg = dailyRenders.Count > 0 
-            ? dailyRenders.Sum(i => i.RenderTime) / dailyRenders.Count 
-            : 0;
-        
-        // Weekly average - renders from the last 7 days
-        var weeklyRenders = items.Where(i => i.Date >= today.AddDays(-7)).ToList();
-        decimal weeklyAvg = weeklyRenders.Count > 0 
-            ? weeklyRenders.Sum(i => i.RenderTime) / weeklyRenders.Count 
-            : 0;
-    
-        // Monthly average - renders from the last 30 days
-        var monthlyRenders = items.Where(i => i.Date >= today.AddDays(-30)).ToList();
-        decimal monthlyAvg = monthlyRenders.Count > 0 
-            ? monthlyRenders.Sum(i => i.RenderTime) / monthlyRenders.Count 
-            : 0;
-    
-        // Overall average from recent renders
-        decimal hundredAverage = recentRenders.Count > 0 
-            ? recentRenders.Sum(i => i.RenderTime) / recentRenders.Count 
-            : 0;
-        
-        decimal average = items.Count > 0 
-            ? items.Sum(i => i.RenderTime) / items.Count 
-            : 0;
-    
-        var stat = new RenderTimeStatisticsViewModel()
-        {
-            Name = component.Name,
-            Last100Average = hundredAverage,
-            DailyAverage = dailyAvg,
-            WeeklyAverage = weeklyAvg,
-            MonthlyAverage = monthlyAvg,
-            Average = average
-        };
-
-        // Get optimization suggestions
-        var optimizationSuggestions = await _context.OptimizationSuggestions
-            .Where(s => s.ComponentId == componentId && s.IsActive && !s.IsDeleted)
-            .OrderByDescending(s => s.CreatedDate)
-            .ToListAsync();
-
-        var componentDetails = new ComponentViewModel()
-        {
-            Id = componentId,
-            ApplicationId = component.ApplicationId,
-            Name = component.Name,
-            Statistics = stat,
-            ScreenComponentRenders = items,
-            OptimizationSuggestions = optimizationSuggestions,
-            Threshold = component.Threshold
-        };
-    
-        return Ok(componentDetails);
+        return NotFound("Component not found");
     }
+
+    var items = await _context.ScreenComponentRenders
+        .Include(r => r.DeviceInfo)  // Include device info
+        .Where(d => d.IsActive && !d.IsDeleted && d.ComponentId == componentId)
+        .OrderByDescending(d => d.Date)
+        .ToListAsync();
+    
+    List<ScreenComponentRender> recentRenders;
+    if (items.Count < 100)
+    {
+        recentRenders = items; // Assign the entire list
+    }
+    else
+    {
+        recentRenders = items.GetRange(0, 100); // Get the first 100 items
+    }
+    DateTime today = DateTime.Today;
+
+    // Daily average - renders from today
+    var dailyRenders = items.Where(i => i.Date.Date == today).ToList();
+    decimal dailyAvg = dailyRenders.Count > 0 
+        ? dailyRenders.Sum(i => i.RenderTime) / dailyRenders.Count 
+        : 0;
+    
+    // Weekly average - renders from the last 7 days
+    var weeklyRenders = items.Where(i => i.Date >= today.AddDays(-7)).ToList();
+    decimal weeklyAvg = weeklyRenders.Count > 0 
+        ? weeklyRenders.Sum(i => i.RenderTime) / weeklyRenders.Count 
+        : 0;
+
+    // Monthly average - renders from the last 30 days
+    var monthlyRenders = items.Where(i => i.Date >= today.AddDays(-30)).ToList();
+    decimal monthlyAvg = monthlyRenders.Count > 0 
+        ? monthlyRenders.Sum(i => i.RenderTime) / monthlyRenders.Count 
+        : 0;
+
+    // Overall average from recent renders
+    decimal hundredAverage = recentRenders.Count > 0 
+        ? recentRenders.Sum(i => i.RenderTime) / recentRenders.Count 
+        : 0;
+    
+    decimal average = items.Count > 0 
+        ? items.Sum(i => i.RenderTime) / items.Count 
+        : 0;
+
+    // Calculate device-specific statistics
+    var deviceStats = items
+        .Where(i => i.DeviceInfo != null)
+        .GroupBy(i => new { 
+            Brand = i.DeviceInfo.Brand ?? "unknown", 
+            Model = i.DeviceInfo.ModelName ?? "unknown" 
+        })
+        .Select(g => new DeviceRenderStatsViewModel
+        {
+            DeviceBrand = g.Key.Brand,
+            DeviceModel = g.Key.Model,
+            RenderCount = g.Count(),
+            AverageRenderTime = g.Average(i => (double)i.RenderTime)
+        })
+        .OrderBy(d => d.AverageRenderTime)
+        .ToList();
+
+    // Calculate OS-specific statistics
+    var osStats = items
+        .Where(i => i.DeviceInfo != null)
+        .GroupBy(i => new { 
+            OS = i.DeviceInfo.OsName ?? i.DeviceInfo.Os ?? "unknown", 
+            Version = i.DeviceInfo.OsVersion ?? "unknown" 
+        })
+        .Select(g => new OsRenderStatsViewModel
+        {
+            OsName = g.Key.OS,
+            OsVersion = g.Key.Version,
+            RenderCount = g.Count(),
+            AverageRenderTime = g.Average(i => (double)i.RenderTime)
+        })
+        .OrderBy(o => o.AverageRenderTime)
+        .ToList();
+
+    var stat = new RenderTimeStatisticsViewModel()
+    {
+        Name = component.Name,
+        Last100Average = hundredAverage,
+        DailyAverage = dailyAvg,
+        WeeklyAverage = weeklyAvg,
+        MonthlyAverage = monthlyAvg,
+        Average = average,
+        DeviceStats = deviceStats,  // Add device statistics
+        OsStats = osStats          // Add OS statistics
+    };
+
+    // Get optimization suggestions
+    var optimizationSuggestions = await _context.OptimizationSuggestions
+        .Where(s => s.ComponentId == componentId && s.IsActive && !s.IsDeleted)
+        .OrderByDescending(s => s.CreatedDate)
+        .ToListAsync();
+
+    var componentDetails = new ComponentViewModel()
+    {
+        Id = componentId,
+        ApplicationId = component.ApplicationId,
+        Name = component.Name,
+        Statistics = stat,
+        ScreenComponentRenders = items,
+        OptimizationSuggestions = optimizationSuggestions,
+        Threshold = component.Threshold
+    };
+
+    return Ok(componentDetails);
+}
     
     [HttpGet("{componentId}",Name = nameof(GetRenderInstances))]
     public async Task<IActionResult> GetRenderInstances(string componentId)
@@ -254,22 +292,59 @@ public class ScreenComponentsController : Controller
     [HttpGet("{componentId}", Name = nameof(GetRenderTimeAverages))]
     public async Task<IActionResult> GetRenderTimeAverages(string componentId)
     {
+        var component = await _context.ScreenComponents.FindAsync(componentId);
+        if (component == null)
+        {
+            return NotFound("Component not found");
+        }
+
         var metrics = await _context.ScreenComponentRenders
-            .Where(m => m.ComponentId == componentId)
+            .Include(r => r.DeviceInfo)  // Include device info
+            .Where(m => m.ComponentId == componentId && m.IsActive && !m.IsDeleted)
+            .OrderByDescending(m => m.Date)
             .ToListAsync();
 
-        var dailyAverages = metrics
-            .GroupBy(m => m.Date.Date)
-            .OrderByDescending(g => g.Key)
-            .Take(15)
-            .Select(g => new DailyAverageViewModel
-            {
-                Date = g.Key,
-                Average = g.Average(m => m.RenderTime)
-            })
-            .ToList();
+        var startDate = DateTime.Today.AddDays(-14); // Last 15 days including today
+        var averages = new List<DailyAverageViewModel>();
 
-        return Ok(dailyAverages);
+        // Group by device for more detailed analysis
+        var metricsByDevice = metrics
+            .Where(m => m.Date >= startDate)
+            .GroupBy(m => m.DeviceInfo != null ? m.DeviceInfo.DeviceType : "unknown");
+
+        // Process each day's data
+        for (int i = 0; i <= 14; i++)
+        {
+            var date = startDate.AddDays(i);
+            var dailyMetrics = metrics.Where(m => m.Date.Date == date.Date).ToList();
+
+            var average = new DailyAverageViewModel
+            {
+                Date = date,
+                Average = (decimal)(dailyMetrics.Any()
+                    ? dailyMetrics.Average(d => (double)d.RenderTime)
+                    : 0),
+                Count = dailyMetrics.Count
+            };
+
+            // Add device breakdown if available
+            if (dailyMetrics.Any(d => d.DeviceInfo != null))
+            {
+                average.DeviceBreakdown = dailyMetrics
+                    .GroupBy(d => d.DeviceInfo?.DeviceType ?? "unknown")
+                    .Select(g => new DeviceAverageViewModel
+                    {
+                        DeviceType = g.Key,
+                        Average = g.Average(d => (double)d.RenderTime),
+                        Count = g.Count()
+                    })
+                    .ToList();
+            }
+
+            averages.Add(average);
+        }
+
+        return Ok(averages);
     }
     
     [HttpDelete("{id}", Name = nameof(DeleteComponentById))]

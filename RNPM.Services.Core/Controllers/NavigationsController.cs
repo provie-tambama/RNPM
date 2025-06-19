@@ -116,33 +116,7 @@ public class NavigationsController : Controller
     {
         var navigation = await _context.Navigations.Include(c => c.NavigationInstances)
             .ThenInclude(ni => ni.DeviceInfo).FirstOrDefaultAsync(c => c.Id == navigationId);
-        /*
-        var items = await _context.NavigationInstances
-            .Where(d => d.IsActive && !d.IsDeleted && d.NavigationId == navigationId).OrderByDescending(d =>d.Date)
-            .ToListAsync();
-        List<NavigationInstance> recentNavigationInstances;
-        if (items.Count < 100)
-        {
-            recentNavigationInstances = items; // Assign the entire list
-        }
-        else
-        {
-           recentNavigationInstances = items.GetRange(0, 100); // Get the first 15 items
-        }
-        var sum = (recentNavigationInstances.Sum(i => i.NavigationCompletionTime));
-        var average = sum / recentNavigationInstances.Count;
-
-        var navigationDetails = new NavigationViewModel()
-        {
-            Id = navigationId,
-            ApplicationId = navigation?.ApplicationId,
-            FromScreen = navigation?.FromScreen,
-            ToScreen = navigation?.ToScreen,
-            Average = average,
-            NavigationInstances = recentNavigationInstances
-        };
-        return Ok(navigationDetails);
-        */
+        
         if (navigation == null)
         {
             return NotFound("Navigation not found");
@@ -150,28 +124,7 @@ public class NavigationsController : Controller
     
         return Ok(navigation);
     }
-/*
-    [HttpGet("{navigationId}", Name = nameof(GetNavigationAverages))]
-    public async Task<IActionResult> GetNavigationAverages(string navigationId)
-    {
-        var metrics = await _context.NavigationInstances
-            .Where(m => m.NavigationId == navigationId)
-            .ToListAsync();
-
-        var dailyAverages = metrics
-            .GroupBy(m => m.Date.Date)
-            .OrderByDescending(g => g.Key)
-            .Take(15)
-            .Select(g => new DailyAverageViewModel
-            {
-                Date = g.Key,
-                Average = g.Average(m => m.NavigationCompletionTime)
-            })
-            .ToList();
-
-        return Ok(dailyAverages);
-    }
-    */
+    
     [HttpGet("{navigationId}", Name = nameof(GetNavigationAverages))]
     public async Task<IActionResult> GetNavigationAverages(string navigationId)
     {

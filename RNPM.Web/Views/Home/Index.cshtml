@@ -1,77 +1,191 @@
 @using RNPM.Common.ViewModels.Core
 @model RNPM.Common.ViewModels.Core.CreateApplicationViewModel
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Applications";
     Layout = "_ApplicationsLayout";
 }
 @{
     var applications = (IEnumerable<ApplicationViewModel>)ViewBag.Applications;
 }
 
-<div id="content" class="app-content align-items-center " xmlns="http://www.w3.org/1999/html">
-    
-<!-- begin widget-list -->
-<div class="row align-items-center justify-content-center">
-    <div class="col-xl-6 col-lg-6 align-self-center">
-    
-    <div class="mb-10px mt-10px fs-10px">
-    <b class="text-body h1">Applications</b>
-    </div>
-        <div class="widget-list rounded mb-4" data-id="widget">
-            
-                @foreach (var item in applications)
+<div id="content" class="app-content">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="page-header mb-1">Your Applications</h1>
+                <p class="text-muted">Manage your React Native performance monitoring applications</p>
+            </div>
+            <button data-bs-toggle="modal" data-bs-target="#modal-dialog" class="btn btn-primary">
+                <i class="fa fa-plus-circle me-1"></i> Add New Application
+            </button>
+        </div>
+
+        <!-- Applications Grid -->
+        <div class="row">
+            @if (applications != null && applications.Any())
+            {
+                foreach (var item in applications)
                 {
-                    <div class="row">
-                        <a href="/Home/Dashboard/@item.Id" class="widget-list-item align-items-center col-11">
-                            <div class="widget-list-media icon">
-                                <i class="fa-brands fa-adn bg-dark text-white"></i>
+                    <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="app-icon-wrapper me-3">
+                                        <div class="app-icon bg-gradient-blue-purple text-white rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="fa fa-mobile-alt"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0 text-truncate">@item.Name</h5>
+                                        <small class="text-muted">Created @item.CreatedDate.ToString("MMM d, yyyy")</small>
+                                    </div>
+                                </div>
+                                <p class="card-text text-muted mb-4">
+                                    App ID: <code class="text-secondary">@item.UniqueAccessCode.Substring(0, 10)...</code>
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between">
+                                    <a href="/Home/Dashboard/@item.Id" class="btn btn-primary">
+                                        <i class="fa fa-chart-line me-1"></i> Dashboard
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-light" data-bs-toggle="dropdown">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a class="dropdown-item" href="/Home/Dashboard/@item.Id">
+                                                <i class="fa fa-chart-line fa-fw me-2 text-muted"></i> View Dashboard
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)">
+                                                <i class="fa fa-cog fa-fw me-2 text-muted"></i> Settings
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" href="@Url.Action("DeleteApplication", "Home", new { id = item.Id })" 
+                                               onclick="return confirm('Are you sure you want to delete this application?')">
+                                                <i class="fa fa-trash fa-fw me-2"></i> Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="widget-list-content">
-                                <h4 class="widget-list-title">@item.Name</h4>
-                            </div>
-                        </a>
-                        <a href="@Url.Action("DeleteApplication", "Home", new { id = item.Id })" class=" widget-list-item align-items-center col-1">
-                            <i class="fa fa-trash fa-lg text-body text-red text-opacity-30"></i>
-                        </a>
+                        </div>
                     </div>
                 }
-            <a href="#modal-dialog" data-bs-toggle="modal" class="widget-list-item bg-transparent">
-                <div class="widget-list-media icon">
-                    <i class="fa-solid fa-plus text-white bg-dark"></i>
-                </div>
-                <div class="widget-list-content">
-                    <h4 class="widget-list-title">Add new +</h4>
-                </div>
-            </a>
-        </div>
-        
-        <!-- #modal-dialog -->
-        <div class="modal fade" id="modal-dialog">
-            <div class="modal-dialog">
-                <form asp-action="CreateApplication" asp-controller="Home" method="post">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Add Application</h4>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-floating mb-20px">
-                                <input type="text" class="form-control fs-13px h-45px" id="applicationName" placeholder="Application Name" asp-for="Name" autofocus required/>
-                                <label for="applicationName" class="d-flex align-items-center">Application Name</label>
+                
+                <!-- Add New Application Card -->
+                <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                    <div class="card h-100 border-dashed border-2 bg-light shadow-none">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center h-100" 
+                             style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#modal-dialog">
+                            <div class="app-icon-wrapper mb-3">
+                                <div class="app-icon bg-light border-2 border-dashed border-primary rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="fa fa-plus text-primary"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <a href="javascript:" class="btn btn-white" data-bs-dismiss="modal">Close</a>
-                            <input class="btn btn-success" type="submit" value="Confirm"/>
+                            <h5 class="text-primary">Add New Application</h5>
+                            <p class="text-muted text-center">Start monitoring a new React Native application</p>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <div class="app-icon-wrapper mb-4 mx-auto">
+                                <div class="app-icon bg-light text-primary rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fa fa-mobile-alt fa-2x"></i>
+                                </div>
+                            </div>
+                            <h4>No Applications Yet</h4>
+                            <p class="text-muted mb-4">Create your first application to start monitoring performance</p>
+                            <button data-bs-toggle="modal" data-bs-target="#modal-dialog" class="btn btn-primary btn-lg">
+                                <i class="fa fa-plus-circle me-1"></i> Add Your First Application
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
-    
     </div>
-    <!-- end widget-list -->
-    </div>
-
 </div>
 
+<!-- Create Application Modal -->
+<div class="modal fade" id="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="CreateApplication" asp-controller="Home" method="post">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-gradient-blue-indigo text-white">
+                    <h5 class="modal-title">Add New Application</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="applicationName" class="form-label">Application Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fa fa-mobile-alt text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control" id="applicationName" 
+                                   placeholder="My React Native App" asp-for="Name" autofocus required />
+                        </div>
+                        <small class="form-text text-muted">
+                            Give your application a descriptive name to easily identify it.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-check-circle me-1"></i> Create Application
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Custom styles */
+    .bg-gradient-blue-purple {
+        background: linear-gradient(135deg, #4e73df 0%, #7c4dff 100%);
+    }
+    
+    .bg-gradient-blue-indigo {
+        background: linear-gradient(135deg, #4e73df 0%, #5e60ce 100%);
+    }
+    
+    .app-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    .border-dashed {
+        border-style: dashed !important;
+    }
+    
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+    }
+    
+    .dropdown-item:active {
+        background-color: #4e73df;
+    }
+    
+    .page-header {
+        font-weight: 600;
+    }
+</style>

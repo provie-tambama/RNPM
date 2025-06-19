@@ -170,50 +170,63 @@
         }
       </div>
     </div>
-    <div class="panel panel-inverse" data-sortable-id="table-basic-6">
-          <div class="panel-heading">
-            <h4 class="panel-title">Averages</h4>
-            <div class="panel-heading-btn">
-              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+          <div class="panel panel-inverse" data-sortable-id="table-basic-2">
+            <div class="panel-heading">
+              <h4 class="panel-title">Averages</h4>
+              <div class="panel-heading-btn">
+                <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+                @if (component.Statistics?.DailyAverage != null)
+                {
+                  <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Today's Average</h5>
+                        <p class="card-text display-6">@component.Statistics.DailyAverage.ToString("###.000") ms</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+                @if (component.Statistics?.WeeklyAverage != null)
+                {
+                  <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Weekly Average</h5>
+                        <p class="card-text display-6">@component.Statistics.WeeklyAverage.ToString("###.000") ms</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+                @if (component.Statistics?.MonthlyAverage != null)
+                {
+                  <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Monthly Average</h5>
+                        <p class="card-text display-6">@component.Statistics.MonthlyAverage.ToString("###.000") ms</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+                @if (component.Statistics?.Average != null)
+                {
+                  <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">All time average</h5>
+                        <p class="card-text display-6">@component.Statistics.Average.ToString("###.000") ms</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+                
+              </div>
             </div>
           </div>
-
-      <div class="panel-body">
-        
-        @if (component.Statistics?.Average != null)
-        {
-          <p class="form-text text-muted">
-            All time average render time: @component.Statistics.Average.ToString("###.000") ms
-          </p>
-        }
-
-        @if (component.Statistics?.Last100Average != null)
-        {
-          <p class="form-text text-muted">
-            Last 100 days average render time: @component.Statistics.Last100Average.ToString("###.000") ms
-          </p>
-        }
-
-        @if (component.Statistics?.MonthlyAverage != null)
-        {
-          <p class="form-text text-muted">
-            Last 30 days average render time: @component.Statistics.MonthlyAverage.ToString("###.000") ms
-          </p>
-        }
-        @if (component.Statistics?.WeeklyAverage != null)
-        {
-          <p class="form-text text-muted">
-            Last 7 days average render time: @component.Statistics.WeeklyAverage.ToString("###.000") ms
-          </p>
-        }
-        @if (component.Statistics?.DailyAverage != null)
-        {
-          <p class="form-text text-muted">
-            Today's average render time: @component.Statistics.DailyAverage.ToString("###.000") ms
-          </p>
-        }
-      </div>
-        </div>
     <!-- Render Time Chart Panel -->
     <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
       <div class="panel-heading">
@@ -227,7 +240,45 @@
         <div class="small text-muted text-center mt-2">Daily average render times (milliseconds) for the last 15 days</div>
       </div>
     </div>
+<!-- Device Distribution Row -->
+<div class="row">
+  <!-- Device Model Distribution Chart -->
+  <div class="col-md-6">
+    <div class="panel panel-inverse" data-sortable-id="flot-chart-3">
+      <div class="panel-heading">
+        <h4 class="panel-title">Device Model Comparison</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload">
+            <i class="fa fa-redo"></i>
+          </a>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="device-model-chart" class="h-300px"></div>
+        <div class="small text-muted text-center mt-2">Render times by device model</div>
+      </div>
+    </div>
+  </div>
 
+  <!-- OS Version Chart -->
+  <div class="col-md-6">
+    <div class="panel panel-inverse" data-sortable-id="flot-chart-4">
+      <div class="panel-heading">
+        <h4 class="panel-title">OS Version Comparison</h4>
+        <div class="panel-heading-btn">
+          <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload">
+            <i class="fa fa-redo"></i>
+          </a>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div id="os-version-chart" class="h-300px"></div>
+        <div class="small text-muted text-center mt-2">Render times by operating system version</div>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Recent Metrics Panel -->
     <!-- Recent Metrics Panel -->
     <div class="panel panel-inverse" data-sortable-id="table-basic-5">
       <div class="panel-heading">
@@ -239,11 +290,13 @@
       
       <div class="panel-body">
         <div class="table-responsive">
-          <table class="table table-striped mb-0">
+          <table class="table table-striped mb-0" id="renderTable">
             <thead>
               <tr>
                 <th>Render Time</th>
                 <th>Date Recorded</th>
+                <th>Device</th>
+                <th>OS</th>
               </tr>
             </thead>
             <tbody>
@@ -254,13 +307,33 @@
                   <tr>
                     <td>@render.RenderTime.ToString("###.000") ms</td>
                     <td>@render.Date</td>
+                    <td>
+                      @if (render.DeviceInfo != null)
+                      {
+                        @($"{render.DeviceInfo.Brand} {render.DeviceInfo.ModelName}")
+                      }
+                      else
+                      {
+                        <span>--</span>
+                      }
+                    </td>
+                    <td>
+                      @if (render.DeviceInfo != null)
+                      {
+                        @($"{render.DeviceInfo.OsName ?? render.DeviceInfo.Os} {render.DeviceInfo.OsVersion ?? ""}")
+                      }
+                      else
+                      {
+                        <span>--</span>
+                      }
+                    </td>
                   </tr>
                 }
               }
               else
               {
                 <tr>
-                  <td colspan="2" class="text-center">No render measurements available</td>
+                  <td colspan="4" class="text-center">No render measurements available</td>
                 </tr>
               }
             </tbody>
@@ -277,6 +350,8 @@
   <script type="4eaa729db74b6f489294f4e0-text/javascript">
   $(document).ready(function () {
     handleRendersChart();
+      handleDeviceModelChart();
+      handleOsVersionChart();
     
     // Toggle reset options visibility
     $('#resetMeasurements').change(function() {
@@ -291,6 +366,15 @@
     if(typeof hljs !== 'undefined') {
       document.querySelectorAll('pre code').forEach((block) => {
         hljs.highlightBlock(block);
+      });
+    }
+    
+    // Initialize datatable with filtering if DataTables is available
+    if ($.fn.DataTable) {
+      $('#renderTable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "order": [[1, "desc"]] // Sort by date column descending
       });
     }
   });
@@ -372,6 +456,306 @@ var handleRendersChart = function () {
       });
     } else {
       $("#renders-chart").html('<div class="alert alert-info m-3">No render data available for charting</div>');
+    }
+  }
+};
+var handleDeviceModelChart = function () {
+  "use strict";
+  $("#device-model-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#device-model-chart").length !== 0) {
+    var component = @Html.Raw(JsonConvert.SerializeObject(component));
+    
+    if (component && component.ScreenComponentRenders && component.ScreenComponentRenders.length > 0) {
+      // Group by device name (brand + model)
+      var deviceCounts = {};
+      var deviceTotals = {};
+      
+      component.ScreenComponentRenders.forEach(function(render) {
+        var deviceName = "unknown";
+        if (render.DeviceInfo) {
+          var brand = render.DeviceInfo.Brand || "";
+          var model = render.DeviceInfo.ModelName || "";
+          
+          if (brand && model) {
+            deviceName = brand + " " + model;
+          } else if (brand) {
+            deviceName = brand;
+          } else if (model) {
+            deviceName = model;
+          }
+        }
+        
+        if (!deviceCounts[deviceName]) {
+          deviceCounts[deviceName] = 0;
+          deviceTotals[deviceName] = 0;
+        }
+        
+        deviceCounts[deviceName]++;
+        deviceTotals[deviceName] += render.RenderTime;
+      });
+      
+      // Calculate averages and prepare data for chart
+      var data = [];
+      var labels = [];
+      var i = 0;
+      
+      // Sort devices by performance (from fastest to slowest)
+      var sortedDevices = Object.keys(deviceCounts).map(function(deviceName) {
+        return {
+          name: deviceName,
+          count: deviceCounts[deviceName],
+          average: deviceTotals[deviceName] / deviceCounts[deviceName]
+        };
+      }).sort(function(a, b) {
+        return a.average - b.average; // Sort by average time (ascending)
+      });
+      
+      // Get top 10 devices if there are too many
+      var displayDevices = sortedDevices;
+      if (sortedDevices.length > 10) {
+        displayDevices = sortedDevices.slice(0, 10);
+      }
+      
+      // Create chart data
+      displayDevices.forEach(function(device, index) {
+        data.push([index, device.average]);
+        
+        // Shorten long device names for display
+        var shortName = device.name;
+        if (shortName.length > 15) {
+          shortName = shortName.substring(0, 12) + "...";
+        }
+        
+        labels.push([index, shortName]);
+      });
+      
+      // If no device data, show message
+      if (data.length === 0) {
+        $("#device-model-chart").html('<div class="alert alert-info m-3">No device data available for charting</div>');
+        return;
+      }
+      
+      $.plot(
+        $("#device-model-chart"),
+        [
+          {
+            data: data,
+            label: "Avg Render Time (ms)",
+            color: app.color.green,
+            bars: { 
+              show: true, 
+              barWidth: 0.6, 
+              align: "center",
+              fillColor: app.color.green
+            },
+            shadowSize: 0,
+          }
+        ],
+        {
+          xaxis: {
+            ticks: labels,
+            tickDecimals: 0,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          yaxis: {
+            ticks: 10,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            min: 0,
+            max: Math.max.apply(null, data.map(d => d[1])) * 1.2, // 20% headroom
+          },
+          grid: {
+            hoverable: true,
+            clickable: true,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            borderWidth: 1,
+            backgroundColor: "transparent",
+            borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          legend: {
+            labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+            margin: 10,
+            noColumns: 1,
+            show: true,
+          },
+        }
+      );
+      
+      var previousPoint = null;
+      $("#device-model-chart").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(2));
+        $("#y").text(pos.y.toFixed(2));
+        if (item) {
+          if (previousPoint !== item.dataIndex) {
+            previousPoint = item.dataIndex;
+            $("#tooltip").remove();
+            
+            var device = displayDevices[item.dataIndex];
+            var avgTime = item.datapoint[1].toFixed(2);
+            
+            var content = device.name + "<br/>" + 
+                         "Avg: " + avgTime + " ms<br/>" + 
+                         "Count: " + device.count;
+            
+            showTooltip(item.pageX, item.pageY, content);
+          }
+        } else {
+          $("#tooltip").remove();
+          previousPoint = null;
+        }
+        event.preventDefault();
+      });
+    } else {
+      $("#device-model-chart").html('<div class="alert alert-info m-3">No device data available for charting</div>');
+    }
+  }
+};
+
+var handleOsVersionChart = function () {
+  "use strict";
+  $("#os-version-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#os-version-chart").length !== 0) {
+    var component = @Html.Raw(JsonConvert.SerializeObject(component));
+    
+    if (component && component.ScreenComponentRenders && component.ScreenComponentRenders.length > 0) {
+      // Group by OS version
+      var osCounts = {};
+      var osTotals = {};
+      
+      component.ScreenComponentRenders.forEach(function(render) {
+        var osInfo = "unknown";
+        if (render.DeviceInfo) {
+          var os = render.DeviceInfo.OsName || render.DeviceInfo.Os || "unknown";
+          var version = render.DeviceInfo.OsVersion || "";
+          osInfo = os + " " + version;
+        }
+        
+        if (!osCounts[osInfo]) {
+          osCounts[osInfo] = 0;
+          osTotals[osInfo] = 0;
+        }
+        
+        osCounts[osInfo]++;
+        osTotals[osInfo] += render.RenderTime;
+      });
+      
+      // Calculate averages and prepare data for chart
+      var data = [];
+      var labels = [];
+      var i = 0;
+      
+      // Sort OS versions by performance (from fastest to slowest)
+      var sortedOsVersions = Object.keys(osCounts).map(function(osInfo) {
+        return {
+          name: osInfo,
+          count: osCounts[osInfo],
+          average: osTotals[osInfo] / osCounts[osInfo]
+        };
+      }).sort(function(a, b) {
+        return a.average - b.average; // Sort by average time (ascending)
+      });
+      
+      // Create chart data
+      sortedOsVersions.forEach(function(osVersion, index) {
+        data.push([index, osVersion.average]);
+        
+        // Shorten long OS names for display
+        var shortName = osVersion.name;
+        if (shortName.length > 15) {
+          shortName = shortName.substring(0, 12) + "...";
+        }
+        
+        labels.push([index, shortName]);
+      });
+      
+      // If no OS data, show message
+      if (data.length === 0) {
+        $("#os-version-chart").html('<div class="alert alert-info m-3">No OS data available for charting</div>');
+        return;
+      }
+      
+      $.plot(
+        $("#os-version-chart"),
+        [
+          {
+            data: data,
+            label: "Avg Render Time (ms)",
+            color: app.color.orange,
+            bars: { 
+              show: true, 
+              barWidth: 0.6, 
+              align: "center",
+              fillColor: app.color.orange
+            },
+            shadowSize: 0,
+          }
+        ],
+        {
+          xaxis: {
+            ticks: labels,
+            tickDecimals: 0,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          yaxis: {
+            ticks: 10,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            min: 0,
+            max: Math.max.apply(null, data.map(d => d[1])) * 1.2, // 20% headroom
+          },
+          grid: {
+            hoverable: true,
+            clickable: true,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            borderWidth: 1,
+            backgroundColor: "transparent",
+            borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          legend: {
+            labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+            margin: 10,
+            noColumns: 1,
+            show: true,
+          },
+        }
+      );
+      
+      var previousPoint = null;
+      $("#os-version-chart").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(2));
+        $("#y").text(pos.y.toFixed(2));
+        if (item) {
+          if (previousPoint !== item.dataIndex) {
+            previousPoint = item.dataIndex;
+            $("#tooltip").remove();
+            
+            var osVersion = sortedOsVersions[item.dataIndex];
+            var avgTime = item.datapoint[1].toFixed(2);
+            
+            var content = osVersion.name + "<br/>" + 
+                         "Avg: " + avgTime + " ms<br/>" + 
+                         "Count: " + osVersion.count;
+            
+            showTooltip(item.pageX, item.pageY, content);
+          }
+        } else {
+          $("#tooltip").remove();
+          previousPoint = null;
+        }
+        event.preventDefault();
+      });
+    } else {
+      $("#os-version-chart").html('<div class="alert alert-info m-3">No OS data available for charting</div>');
     }
   }
 };
