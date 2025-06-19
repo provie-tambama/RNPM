@@ -8,18 +8,123 @@
     var navigation = (NavigationViewModel)ViewBag.Navigation;
   string averageString = navigation.Average.ToString("###.000") ?? "0.000";
   var navigationAverages = (List<DailyAverageViewModel>)ViewBag.NavigationAverages;
+  
+  // Helper methods for statistics
+  decimal CalculateMedian(List<decimal> values) {
+    var sortedValues = values.OrderBy(v => v).ToList();
+    int count = sortedValues.Count;
+    if (count == 0)
+      return 0;
+            
+    if (count % 2 == 0)
+      return (sortedValues[count / 2 - 1] + sortedValues[count / 2]) / 2;
+    else
+      return sortedValues[count / 2];
+  }
+    
+  decimal CalculateStdDev(List<decimal> values) {
+    int count = values.Count;
+    if (count < 2)
+      return 0;
+            
+    decimal avg = values.Average();
+    decimal sumOfSquaresOfDifferences = values.Sum(val => (val - avg) * (val - avg));
+    decimal variance = sumOfSquaresOfDifferences / (count - 1);
+    return (decimal)Math.Sqrt((double)variance);
+  }
+    
+  decimal CalculatePercentile(List<decimal> values, int percentile) {
+    var sortedValues = values.OrderBy(v => v).ToList();
+    int count = sortedValues.Count;
+    if (count == 0)
+      return 0;
+            
+    decimal n = (percentile / 100m) * (count - 1) + 1;
+    int k = (int)Math.Floor(n);
+    decimal d = n - k;
+        
+    if (k < 1)
+      return sortedValues[0];
+    if (k >= count)
+      return sortedValues[count - 1];
+            
+    return sortedValues[k - 1] + d * (sortedValues[k] - sortedValues[k - 1]);
+  }
 }
 
 <div id="content" class="app-content">
-  <ol class="breadcrumb float-xl-end"></ol>
+    <ol class="breadcrumb float-xl-end">
+    </ol>
     
-  <h1 class="page-header">NAVIGATION PATH: @navigation.FromScreen ---> @navigation.ToScreen</h1>
-    
+  <h1 class="page-header">
+    Navigation: <span class="text-primary">@navigation.FromScreen → @navigation.ToScreen</span>
+  </h1>
+  <p class="lead">
+    Viewing performance metrics for navigation from <strong>@navigation.FromScreen</strong>
+    to <strong>@navigation.ToScreen</strong>
+  </p>
   <div class="col-12">
-    
+        <div class="panel panel-inverse" data-sortable-id="table-basic-2">
+          <div class="panel-heading">
+            <h4 class="panel-title">Navigation Averages</h4>
+            <div class="panel-heading-btn">
+              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            </div>
+          </div>
+          <div class="panel-body">
+            @if (navigationAverages != null && navigationAverages.Any())
+            {
+              var todayAvg = navigationAverages.FirstOrDefault()?.Average ?? 0;
+              var weeklyAvg = navigationAverages.Take(7).Average(a => a.Average);
+              var monthlyAvg = navigationAverages.Take(30).Average(a => a.Average);
+              var allTimeAvg = navigation.NavigationInstances.Average(n => n.NavigationCompletionTime);
+              
+              <div class="row">
+                <div class="col-md-3 col-sm-6 mb-3">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Today's Average</h5>
+                      <p class="card-text display-6">@Math.Round(todayAvg, 2) ms</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Weekly Average</h5>
+                      <p class="card-text display-6">@Math.Round(weeklyAvg, 2) ms</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Monthly Average</h5>
+                      <p class="card-text display-6">@Math.Round(monthlyAvg, 2) ms</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">All Time Average</h5>
+                      <p class="card-text display-6">@Math.Round(allTimeAvg, 2) ms</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            else
+            {
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle me-2"></i> No average data available for this navigation.
+              </div>
+            }
+          </div>
+        </div>
     <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
       <div class="panel-heading">
-        <h4 class="panel-title">Averages</h4>
+        <h4 class="panel-title">Navigation Performance Trend</h4>
         <div class="panel-heading-btn">
           <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
         </div>
@@ -27,54 +132,123 @@
       <div class="panel-body">
         <p class="h4">Average Navigation Time: <b>@averageString ms</b>
         </p>
-        <p class="h5">Most Recent Navigation Times:</p>
         <div id="navigations-chart" class="h-250px"></div>
+        <div class="small text-muted text-center mt-2">Daily average navigation times (milliseconds) for the last 15 days</div>
       </div>
       <div class="hljs-wrapper">
       </div>
     </div>
-    <div class="panel panel-inverse" data-sortable-id="table-basic-5">
-                  
-                  <div class="panel-heading">
-                  <h4 class="panel-title">Most recent metrics</h4>
-                  <div class="panel-heading-btn">
-                  <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
-                  </div>
-                  </div>
-                  
-                  <div class="panel-body">
-                  
-                  <div class="table-responsive">
-                  <table class="table table-striped mb-0">
-                  <thead>
+    <!-- Device Distribution Row -->
+    <div class="row">
+      <!-- Device Type Distribution Chart -->
+      <!-- Device Model Distribution Chart -->
+      <div class="col-md-6">
+        <div class="panel panel-inverse" data-sortable-id="flot-chart-2">
+          <div class="panel-heading">
+            <h4 class="panel-title">Device Model Comparison</h4>
+            <div class="panel-heading-btn">
+              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload">
+                <i class="fa fa-redo"></i>
+              </a>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="device-distribution-chart" class="h-300px"></div>
+            <div class="small text-muted text-center mt-2">Navigation times by device model</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OS Version Chart -->
+      <div class="col-md-6">
+        <div class="panel panel-inverse" data-sortable-id="flot-chart-3">
+          <div class="panel-heading">
+            <h4 class="panel-title">OS Version Comparison</h4>
+            <div class="panel-heading-btn">
+              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload">
+                <i class="fa fa-redo"></i>
+              </a>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="os-version-chart" class="h-300px"></div>
+            <div class="small text-muted text-center mt-2">Navigation times by operating system version</div>
+          </div>
+        </div>
+      </div>
+    </div>
+        <div class="panel panel-inverse" data-sortable-id="table-basic-5">
+          <div class="panel-heading">
+            <h4 class="panel-title">Recent Navigation Metrics</h4>
+            <div class="panel-heading-btn">
+              <a href="javascript:;" class="btn btn-xs btn-icon btn-success" data-toggle="panel-reload"><i class="fa fa-redo"></i></a>
+            </div>
+          </div>
+          
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table table-striped mb-0" id="navigationTable">
+                <thead>
                   <tr>
-                  <th>Metric</th>
-                  <th>Date Recorded</th>
+                    <th>Navigation Time</th>
+                    <th>Date</th>
+                    <th>Device Type</th>
+                    <th>OS</th>
+                    <th>Model</th>
                   </tr>
-                  </thead>
-                  <tbody>
-                  @if (navigation.NavigationInstances != null)
+                </thead>
+                <tbody>
+                  @if (navigation.NavigationInstances != null && navigation.NavigationInstances.Any())
                   {
-                    foreach (var item in navigation.NavigationInstances)
+                    foreach (var instance in navigation.NavigationInstances.OrderByDescending(n => n.Date).Take(50))
                     {
                       <tr>
-                        <td>@item.NavigationCompletionTime.ToString("###.000")ms</td>
-                        <td>@item.Date</td>
+                        <td>@instance.NavigationCompletionTime.ToString("###.000") ms</td>
+                        <td>@instance.Date</td>
+                        <td>
+                          @if (instance.DeviceInfo != null)
+                          {
+                            <span class="badge bg-primary">@(instance.DeviceInfo.DeviceType ?? "unknown")</span>
+                          }
+                          else
+                          {
+                            <span class="badge bg-secondary">unknown</span>
+                          }
+                        </td>
+                        <td>
+                          @if (instance.DeviceInfo != null)
+                          {
+                            @($"{instance.DeviceInfo.OsName ?? instance.DeviceInfo.Os} {instance.DeviceInfo.OsVersion ?? "??"}")
+                          }
+                          else
+                          {
+                            <span>--</span>
+                          }
+                        </td>
+                        <td>
+                          @if (instance.DeviceInfo != null)
+                          {
+                            @($"{instance.DeviceInfo.Brand} {instance.DeviceInfo.ModelName}")
+                          }
+                          else
+                          {
+                            <span>--</span>
+                          }
+                        </td>
                       </tr>
                     }
                   }
-                  </tbody>
-                  </table>
-                  </div>
-                  
-                  </div>
-                  
-                  
-                  <div class="hljs-wrapper">
-                  <pre><code class="html" data-url="../assets/data/table-basic/code-5.json"></code></pre>
-                  </div>
-                  
+                  else
+                  {
+                    <tr>
+                      <td colspan="5" class="text-center">No navigation metrics available</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
     
   </div>
 </div>
@@ -82,7 +256,9 @@
 @section Scripts{
   <script type="4eaa729db74b6f489294f4e0-text/javascript">
   $(document).ready(function () {
-  handleNavigationsChart()
+  handleNavigationsChart();
+    handleDeviceDistributionChart();
+    handleOsVersionChart();
   });
   </script>
   <script>
@@ -97,15 +273,23 @@ var handleNavigationsChart = function () {
   }
   if ($("#navigations-chart").length !== 0) {
     var navigationAverages = @Html.Raw(JsonConvert.SerializeObject(navigationAverages));
-    if (navigationAverages.length > 0) {
-    var data = navigationAverages.map((item, index) => [index + 1, item.Average]);
-    var xLabel = navigationAverages.map((item, index) => [index + 1, item.Date]);
-    }
-
-    else {
-      alert("No Render Values Available");
+    if (navigationAverages && navigationAverages.length > 0) {
+      // Format dates for display
+      var data = navigationAverages.map((item, index) => [index + 1, item.Average]);
+      var xLabel = navigationAverages.map((item, index) => {
+        // Format the date for the x-axis labels
+        var date = new Date(item.Date);
+        var formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric'
+        });
+        return [index + 1, formattedDate];
+      });
+    } else {
+      alert("No Navigation Values Available");
       location.href("#");
-      }
+      return;
+    }
 
     $.plot(
       $("#navigations-chart"),
@@ -155,8 +339,18 @@ var handleNavigationsChart = function () {
         if (previousPoint !== item.dataIndex) {
           previousPoint = item.dataIndex;
           $("#tooltip").remove();
+          
+          // Get and format the date for the tooltip
+          var dateString = navigationAverages[item.dataIndex].Date;
+          var date = new Date(dateString);
+          var formattedDate = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+          
           var y = item.datapoint[1].toFixed(2);
-          var content = item.series.label + " " + y;
+          var content = formattedDate + ": " + y + " ms";
           showTooltip(item.pageX, item.pageY, content);
         }
       } else {
@@ -166,6 +360,297 @@ var handleNavigationsChart = function () {
       event.preventDefault();
     });
   }
-  };
+};
+var handleDeviceDistributionChart = function () {
+  "use strict";
+  $("#device-distribution-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#device-distribution-chart").length !== 0) {
+    var navigation = @Html.Raw(JsonConvert.SerializeObject(navigation));
+    
+    if (navigation && navigation.NavigationInstances && navigation.NavigationInstances.length > 0) {
+      // Group by device name (brand + model)
+      var deviceCounts = {};
+      var deviceTotals = {};
+      
+      navigation.NavigationInstances.forEach(function(instance) {
+        var deviceName = "unknown";
+        if (instance.DeviceInfo) {
+          var brand = instance.DeviceInfo.Brand || "";
+          var model = instance.DeviceInfo.ModelName || "";
+          
+          if (brand && model) {
+            deviceName = brand + " " + model;
+          } else if (brand) {
+            deviceName = brand;
+          } else if (model) {
+            deviceName = model;
+          }
+        }
+        
+        if (!deviceCounts[deviceName]) {
+          deviceCounts[deviceName] = 0;
+          deviceTotals[deviceName] = 0;
+        }
+        
+        deviceCounts[deviceName]++;
+        deviceTotals[deviceName] += instance.NavigationCompletionTime;
+      });
+      
+      // Calculate averages and prepare data for chart
+      var data = [];
+      var labels = [];
+      var i = 0;
+      
+      // Sort devices by performance (from fastest to slowest)
+      var sortedDevices = Object.keys(deviceCounts).map(function(deviceName) {
+        return {
+          name: deviceName,
+          count: deviceCounts[deviceName],
+          average: deviceTotals[deviceName] / deviceCounts[deviceName]
+        };
+      }).sort(function(a, b) {
+        return a.average - b.average; // Sort by average time (ascending)
+      });
+      
+      // Get top 10 devices if there are too many
+      var displayDevices = sortedDevices;
+      if (sortedDevices.length > 10) {
+        displayDevices = sortedDevices.slice(0, 10);
+      }
+      
+      // Create chart data
+      displayDevices.forEach(function(device, index) {
+        data.push([index, device.average]);
+        
+        // Shorten long device names for display
+        var shortName = device.name;
+        if (shortName.length > 15) {
+          shortName = shortName.substring(0, 12) + "...";
+        }
+        
+        labels.push([index, shortName]);
+      });
+      
+      // If no device data, show message
+      if (data.length === 0) {
+        $("#device-distribution-chart").html('<div class="alert alert-info m-3">No device data available for charting</div>');
+        return;
+      }
+      
+      $.plot(
+        $("#device-distribution-chart"),
+        [
+          {
+            data: data,
+            label: "Avg Navigation Time (ms)",
+            color: app.color.green,
+            bars: { 
+              show: true, 
+              barWidth: 0.6, 
+              align: "center",
+              fillColor: app.color.green
+            },
+            shadowSize: 0,
+          }
+        ],
+        {
+          xaxis: {
+            ticks: labels,
+            tickDecimals: 0,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          yaxis: {
+            ticks: 10,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            min: 0,
+            max: Math.max.apply(null, data.map(d => d[1])) * 1.2, // 20% headroom
+          },
+          grid: {
+            hoverable: true,
+            clickable: true,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            borderWidth: 1,
+            backgroundColor: "transparent",
+            borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          legend: {
+            labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+            margin: 10,
+            noColumns: 1,
+            show: true,
+          },
+        }
+      );
+      
+      var previousPoint = null;
+      $("#device-distribution-chart").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(2));
+        $("#y").text(pos.y.toFixed(2));
+        if (item) {
+          if (previousPoint !== item.dataIndex) {
+            previousPoint = item.dataIndex;
+            $("#tooltip").remove();
+            
+            var device = displayDevices[item.dataIndex];
+            var avgTime = item.datapoint[1].toFixed(2);
+            
+            var content = device.name + "<br/>" + 
+                         "Avg: " + avgTime + " ms<br/>" + 
+                         "Count: " + device.count;
+            
+            showTooltip(item.pageX, item.pageY, content);
+          }
+        } else {
+          $("#tooltip").remove();
+          previousPoint = null;
+        }
+        event.preventDefault();
+      });
+    } else {
+      $("#device-distribution-chart").html('<div class="alert alert-info m-3">No device data available for charting</div>');
+    }
+  }
+};
+
+var handleOsVersionChart = function () {
+  "use strict";
+  $("#os-version-chart").empty();
+  function showTooltip(x, y, contents) {
+    $('<div id="tooltip" class="flot-tooltip">' + contents + "</div>")
+      .css({ top: y - 45, left: x - 55 })
+      .appendTo("body")
+      .fadeIn(200);
+  }
+  if ($("#os-version-chart").length !== 0) {
+    var navigation = @Html.Raw(JsonConvert.SerializeObject(navigation));
+    
+    if (navigation && navigation.NavigationInstances && navigation.NavigationInstances.length > 0) {
+      // Group by OS version
+      var osCounts = {};
+      var osTotals = {};
+      
+      navigation.NavigationInstances.forEach(function(instance) {
+        var osInfo = "unknown";
+        if (instance.DeviceInfo) {
+          var os = instance.DeviceInfo.OsName || instance.DeviceInfo.Os || "unknown";
+          var version = instance.DeviceInfo.OsVersion || "";
+          osInfo = os + " " + version;
+        }
+        
+        if (!osCounts[osInfo]) {
+          osCounts[osInfo] = 0;
+          osTotals[osInfo] = 0;
+        }
+        
+        osCounts[osInfo]++;
+        osTotals[osInfo] += instance.NavigationCompletionTime;
+      });
+      
+      // Calculate averages and prepare data for chart
+      var data = [];
+      var labels = [];
+      var i = 0;
+      
+      for (var osInfo in osCounts) {
+        var average = osTotals[osInfo] / osCounts[osInfo];
+        data.push([i, average]);
+        
+        // Shorten long OS names for display
+        var shortName = osInfo;
+        if (osInfo.length > 15) {
+          shortName = osInfo.substring(0, 12) + "...";
+        }
+        
+        labels.push([i, shortName]);
+        i++;
+      }
+      
+      // If no OS data, show message
+      if (data.length === 0) {
+        $("#os-version-chart").html('<div class="alert alert-info m-3">No OS data available for charting</div>');
+        return;
+      }
+      
+      $.plot(
+        $("#os-version-chart"),
+        [
+          {
+            data: data,
+            label: "Avg Navigation Time (ms)",
+            color: app.color.orange,
+            bars: { 
+              show: true, 
+              barWidth: 0.6, 
+              align: "center",
+              fillColor: app.color.orange
+            },
+            shadowSize: 0,
+          }
+        ],
+        {
+          xaxis: {
+            ticks: labels,
+            tickDecimals: 0,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          yaxis: {
+            ticks: 10,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            min: 0,
+            max: Math.max.apply(null, data.map(d => d[1])) * 1.2, // 20% headroom
+          },
+          grid: {
+            hoverable: true,
+            clickable: true,
+            tickColor: "rgba(" + app.color.darkRgb + ", .2)",
+            borderWidth: 1,
+            backgroundColor: "transparent",
+            borderColor: "rgba(" + app.color.darkRgb + ", .2)",
+          },
+          legend: {
+            labelBoxBorderColor: "rgba(" + app.color.darkRgb + ", .2)",
+            margin: 10,
+            noColumns: 1,
+            show: true,
+          },
+        }
+      );
+      
+      var previousPoint = null;
+      $("#os-version-chart").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(2));
+        $("#y").text(pos.y.toFixed(2));
+        if (item) {
+          if (previousPoint !== item.dataIndex) {
+            previousPoint = item.dataIndex;
+            $("#tooltip").remove();
+            
+            var osKey = Object.keys(osCounts)[item.dataIndex];
+            var avgTime = item.datapoint[1].toFixed(2);
+            var count = osCounts[osKey];
+            
+            var content = osKey + "<br/>" + 
+                         "Avg: " + avgTime + " ms<br/>" + 
+                         "Count: " + count;
+            
+            showTooltip(item.pageX, item.pageY, content);
+          }
+        } else {
+          $("#tooltip").remove();
+          previousPoint = null;
+        }
+        event.preventDefault();
+      });
+    } else {
+      $("#os-version-chart").html('<div class="alert alert-info m-3">No OS data available for charting</div>');
+    }
+  }
+};
 </script>
 }
