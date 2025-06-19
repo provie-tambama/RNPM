@@ -127,17 +127,129 @@
                         </div>
                     </div>
                     
-                    <p class="mt-3">Example integration:</p>
-                    <pre><code>import { withRenderTimeMonitor, NavigationObserver, fetchWithTimer } from 'react-native-performance-monitor';
-
-// For component performance monitoring
-export default withRenderTimeMonitor(YourComponent);
-
-// For navigation performance
-&lt;NavigationObserver uniqueAccessCode="@application.UniqueAccessCode" /&gt;
-
-// For network request monitoring
-fetchWithTimer('@application.UniqueAccessCode', 'RequestName', 'https://api.example.com/data');</code></pre>
+                    <div class="row">
+                        <!-- Component Render Monitoring Tab -->
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-blue text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fa fa-mobile me-1"></i> Component Render Monitoring
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Track component render times to identify slow UI components:</p>
+                                    <pre><code>import { withRenderTimeMonitor } from 'react-native-performance-monitor';
+    
+    // Component definition
+    const MyComponent = (props) => {
+      return (
+        <View>
+          <Text>Hello World</Text>
+        </View>
+      );
+    };
+    
+    // Export with monitoring wrapper
+    export default withRenderTimeMonitor(MyComponent);</code></pre>
+                                    <p class="small text-muted mt-2">Pass access code through props:</p>
+                                    <pre><code><MyComponent uniqueAccessCode="@application.UniqueAccessCode" /></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation Monitoring Tab -->
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fa fa-code-compare me-1"></i> Navigation Monitoring
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Track navigation times between screens:</p>
+                                    <pre><code>// 1. Add NavigationObserver to your app
+    import { NavigationObserver } from 'react-native-performance-monitor';
+    
+    // Inside your Navigation Container
+    <NavigationContainer>
+      <NavigationObserver 
+        uniqueAccessCode="@application.UniqueAccessCode" 
+      />
+      <Stack.Navigator>
+        {/* Your screens */}
+      </Stack.Navigator>
+    </NavigationContainer>
+    
+    // 2. Track navigation start time
+    import { setNavigationStartTime } from 'react-native-performance-monitor';
+    
+    const goToDetails = () => {
+      setNavigationStartTime(
+        performance.now(), 
+        'Home',          // Source screen
+        'Details'        // Destination screen
+      );
+      navigation.navigate('Details');
+    };</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Network Request Monitoring Tab -->
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-orange text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fa fa-link me-1"></i> Network Request Monitoring
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Track API call performance:</p>
+                                    <pre><code>import { fetchWithTimer } from 'react-native-performance-monitor';
+    
+    // Replace standard fetch calls
+    const loadData = async () => {
+      try {
+        const response = await fetchWithTimer(
+          '@application.UniqueAccessCode',  // Access code
+          'getUserProfile',                 // Request name
+          'https://api.example.com/users'   // URL
+        );
+        
+        // Process response normally
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };</code></pre>
+                                    <p class="small text-muted mt-2">With request options:</p>
+                                    <pre><code>// Fourth parameter for options
+    fetchWithTimer(
+      accessCode,
+      requestName,
+      url,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }
+    );</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 alert alert-secondary">
+                        <h5><i class="fa fa-lightbulb me-2"></i>Best Practices</h5>
+                        <ul class="mb-0">
+                            <li>Apply <code>withRenderTimeMonitor</code> to complex components that might have performance issues</li>
+                            <li>Call <code>setNavigationStartTime</code> immediately before triggering navigation</li>
+                            <li>Use <code>fetchWithTimer</code> for critical API calls that impact user experience</li>
+                            <li>Compare metrics across different devices and network conditions</li>
+                            <li>Review the dashboard regularly to identify optimization opportunities</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
