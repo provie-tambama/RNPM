@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { createComponentRenderMetric, submitComponentCode } from '../utils/api';
 import { getComponentSource } from '../utils/sourceRegistry';
 
+const seenStartTimes = new Set<number>();
+
 type WithRenderTimeMonitorProps = {
   uniqueAccessCode: string;
   onRenderTimeMeasured?: (time: number) => void;
@@ -18,19 +20,37 @@ const withRenderTimeMonitor = <P extends object>(
     captureCode = true,
     ...props
   }) => {
-    const startTime = useRef<number>(performance.now());
-    //console.log(`Start time: ${startTime.current}`);
+        const hasBeenMeasured = useRef<boolean>(false);
+    // Ref to store the start time
+    const startTimeRef = useRef<number>(performance.now());
+
+    console.log(`Start time: ${startTimeRef.current}`);
 
     useEffect(() => {
-      const endTime = performance.now();
-      //console.log(`End time: ${endTime}`);
-      const renderTime = endTime - startTime.current;
-      //console.log(`Calculated render time: ${renderTime}ms`);
-      const componentName = WrappedComponent.displayName || WrappedComponent.name || 'UnknownComponent';
+      if (!hasBeenMeasured.current){
+        const startTime = startTimeRef.current;
+        const endTime = performance.now();
 
-      if (onRenderTimeMeasured) {
-        onRenderTimeMeasured(renderTime);
-      }
+        if (seenStartTimes.has(startTime)) {
+          console.log(`Skipping duplicate measurement with start time: ${startTime}`);
+          return;
+        }
+
+        seenStartTimes.add(startTime);
+
+        hasBeenMeasured.current = true;
+
+        console.log(`End time: ${endTime}`);
+        const renderTime = endTime - startTime;
+        console.log(`Calculated render time: ${renderTime}ms`);
+        const componentName = WrappedComponent.displayName || WrappedComponent.name || 'UnknownComponent';
+        console.log(`Component name: ${componentName}`);
+
+        if (onRenderTimeMeasured) {
+          console.log('render time:', renderTime);
+          onRenderTimeMeasured(renderTime);
+        }
+
 
       const send = async () => {
 
@@ -41,7 +61,7 @@ const withRenderTimeMonitor = <P extends object>(
             // Get component source code
             console.log('Component name:', componentName);
             const sourceCode = getComponentSource(componentName);
-            console.log('Component source code:', sourceCode);
+            //console.log('Component source code:', sourceCode);
             if (sourceCode) {
               await submitComponentCode(uniqueAccessCode, componentName, sourceCode);
             }
@@ -55,6 +75,9 @@ const withRenderTimeMonitor = <P extends object>(
 
       }
       send();
+      }
+
+      
     }, []);
 
     return <WrappedComponent {...(props as P)} />;
