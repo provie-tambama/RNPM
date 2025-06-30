@@ -17,7 +17,7 @@ using Serilog;
 using automapper = AutoMapper;
 using LoginViewModel = RNPM.Common.ViewModels.LoginViewModel;
 
-namespace RNPM.API.Controllers
+namespace RNPM.Services.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

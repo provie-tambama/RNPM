@@ -13,7 +13,7 @@ using RNPM.Common.ViewModels.UserManagement;
 using Serilog;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-namespace Agrifora.API.Controllers
+namespace RNPM.Services.Core.Controllers
 {
     [Route("api/[controller]/[action]")]
     //[Authorize]

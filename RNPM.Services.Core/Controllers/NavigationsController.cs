@@ -11,7 +11,7 @@ using RNPM.Common.ViewModels.Core;
 using Serilog;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-namespace RNPM.API.Controllers;
+namespace RNPM.Services.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
 //[Authorize]

@@ -8,7 +8,7 @@ using RNPM.Common.Models;
 using RNPM.Common.ViewModels.Core;
 using IConfigurationProvider = AutoMapper.IConfigurationProvider;
 
-namespace RNPM.API.Controllers;
+namespace RNPM.Services.Core.Controllers;
 
 [Route("api/[controller]/[action]")]
 //[Authorize]
