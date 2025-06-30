@@ -24,7 +24,7 @@ const withRenderTimeMonitor = <P extends object>(
     // Ref to store the start time
     const startTimeRef = useRef<number>(performance.now());
 
-    console.log(`Start time: ${startTimeRef.current}`);
+    //console.log(`Start time: ${startTimeRef.current}`);
 
     useEffect(() => {
       if (!hasBeenMeasured.current){
@@ -32,7 +32,7 @@ const withRenderTimeMonitor = <P extends object>(
         const endTime = performance.now();
 
         if (seenStartTimes.has(startTime)) {
-          console.log(`Skipping duplicate measurement with start time: ${startTime}`);
+          //console.log(`Skipping duplicate measurement with start time: ${startTime}`);
           return;
         }
 
@@ -40,14 +40,14 @@ const withRenderTimeMonitor = <P extends object>(
 
         hasBeenMeasured.current = true;
 
-        console.log(`End time: ${endTime}`);
+        //console.log(`End time: ${endTime}`);
         const renderTime = endTime - startTime;
-        console.log(`Calculated render time: ${renderTime}ms`);
+        //console.log(`Calculated render time: ${renderTime}ms`);
         const componentName = WrappedComponent.displayName || WrappedComponent.name || 'UnknownComponent';
-        console.log(`Component name: ${componentName}`);
+        //console.log(`Component name: ${componentName}`);
 
         if (onRenderTimeMeasured) {
-          console.log('render time:', renderTime);
+          //console.log('render time:', renderTime);
           onRenderTimeMeasured(renderTime);
         }
 

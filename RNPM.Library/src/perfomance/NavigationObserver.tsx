@@ -18,8 +18,8 @@ const NavigationObserver: React.FC<NavigationObserverProps> = ({ uniqueAccessCod
         const { startTime, targetScreen, fromScreen } = data;
         const endTime = performance.now();
         const navigationTime = endTime - startTime;
-        console.log(`Navigation time: ${navigationTime}ms`);
-        console.log(`Navigating from ${fromScreen} to ${targetScreen} with unique access code ${uniqueAccessCode}`);
+        //console.log(`Navigation time: ${navigationTime}ms`);
+        //console.log(`Navigating from ${fromScreen} to ${targetScreen} with unique access code ${uniqueAccessCode}`);
         if (onNavigationTimeMeasured) {
           onNavigationTimeMeasured(navigationTime, fromScreen, targetScreen);
         }

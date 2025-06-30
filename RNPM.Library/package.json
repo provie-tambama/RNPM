@@ -1,6 +1,6 @@
 {
   "name": "@provie17/react-native-performance-monitor",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "For monitoring the performance of React Native Apps",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",

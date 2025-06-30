@@ -13,13 +13,13 @@ const retryMetrics = async () => {
       await createNetworkRequestMetric(metric.uniqueAccessCode, metric.name, metric.requestCompletionTime);
     }
   }
-  console.log("done retrying");
+  //console.log("done retrying");
   // Clear the metrics after retryin
   await removeMetrics();
 };
 
 // Call retryMetrics periodically
 export const initRetryMechanism = () => {
-  console.log("initRetryMechanism");
+  //console.log("initRetryMechanism");
   setInterval(retryMetrics, 60000);
 };

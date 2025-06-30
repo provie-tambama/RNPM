@@ -129,7 +129,7 @@ try
 
         builder.Services.AddAuthorization();
         
-        builder.WebHost.UseUrls("http://192.168.100.11:7018");
+        //builder.WebHost.UseUrls("http://192.168.100.11:7018");
 
         var app = builder.Build();
 
